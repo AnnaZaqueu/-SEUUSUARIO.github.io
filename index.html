@@ -42,6 +42,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15p
 button{font:inherit;color:inherit}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hidden{display:none!important}
+/* tamanho da interface escolhido em Aparência (a folha não muda, só botões e textos) */
+.topbar,.tools,.pager,#home,.sheet,.dlg{zoom:var(--uiz,1)}
 
 /* ---------- Estante ---------- */
 #home{height:100%;overflow-y:auto;padding:20px max(16px,4vw) 40px}
@@ -182,6 +184,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .theme{border:2px solid transparent;border-radius:8px;padding:0;cursor:pointer;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:600;color:var(--muted)}
 .theme canvas{width:60px;height:44px;border-radius:6px}
 .theme[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.emo-big{font-size:30px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .emo{font-size:22px;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .emo[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .menu{position:fixed;z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:230px;
@@ -219,13 +222,20 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .sheet-head h3{margin:0;font-size:17px}
 .sheet-body{overflow-y:auto;padding:6px 16px 16px}
 .sheet-foot{border-top:1px solid var(--line);padding:10px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs .chip{font-size:15px;padding:10px 16px}
+.tpl-layout{display:grid;grid-template-columns:minmax(240px,34%) 1fr;gap:20px;align-items:start}
+.tpl-big{position:sticky;top:0;display:flex;flex-direction:column;gap:8px;align-items:center}
+.tpl-big canvas{width:100%;max-width:440px;aspect-ratio:1000/1414;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.2);background:#fff}
+.tpl-big b{font-size:17px}
+.tpl-big small{color:var(--muted);font-size:14px;text-align:center;line-height:1.4}
+@media (max-width:760px){ .tpl-layout{grid-template-columns:1fr} .tpl-big canvas{max-width:260px} }
 .stk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
 .stk{font-size:34px;line-height:1;border:0;background:var(--bg);border-radius:12px;height:58px;cursor:pointer;
   font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .stk:active{background:var(--accent-soft)}
-.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px}
-.tpl{border:2px solid transparent;border-radius:10px;background:none;padding:4px;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:12.5px;font-weight:600}
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.tpl{border:2px solid transparent;border-radius:12px;background:none;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:center;font-size:15px;font-weight:600;line-height:1.25;text-align:center}
 .tpl canvas{width:100%;aspect-ratio:1000/1414;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.18)}
 .tpl[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .pg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px}
@@ -258,7 +268,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M12 12v6M9 15l3 3 3-3"/></svg>
         Importar PDF
       </button>
-      <button class="btn" id="homeMore" type="button" aria-label="Backup e mais opções">
+      <button class="btn" id="homeMore" type="button" aria-label="Aparência, backup e mais opções">
         <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
       </button>
       <button class="btn primary" id="newNb" type="button">
@@ -524,6 +534,44 @@ function savePrefs(){
 }
 
 /* ================================================================
+   Aparência do app (tema, cor, fundo da mesa, tamanho)
+   ================================================================ */
+const ACCENTS = [['#2e5bd0', 'Azul'], ['#1f6f78', 'Petróleo'], ['#5f6f2e', 'Oliva'], ['#a8662a', 'Caramelo'], ['#b5502e', 'Terracota'],
+  ['#8e2f4a', 'Vinho'], ['#c2417f', 'Rosa'], ['#6b46c1', 'Roxo'], ['#3c4454', 'Grafite']];
+const DESKS = [['', 'Padrão'], ['#e9e1d3', 'Bege'], ['#dbe3d6', 'Sálvia'], ['#e4e0ef', 'Lavanda'], ['#dde6ef', 'Névoa'], ['#f1ddd6', 'Rosé'], ['#2a2d34', 'Escuro']];
+const UI_SIZES = [[1, 'Normal'], [1.15, 'Grande'], [1.3, 'Muito grande']];
+const LOOK = Object.assign({ theme: 'auto', accent: '#2e5bd0', desk: '', ui: 1 }, (() => { try { return JSON.parse(LS.get('caderno.look') || '{}'); } catch(e){ return {}; } })());
+function mixHex(a, b, t){ const A = hexToRgb(a), B = hexToRgb(b); return 'rgb(' + A.map((v, i) => Math.round(v * (1 - t) + B[i] * t)).join(',') + ')'; }
+function applyLook(){
+  const root = document.documentElement;
+  if (LOOK.theme === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', LOOK.theme);
+  const dark = LOOK.theme === 'dark' || (LOOK.theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  root.style.setProperty('--accent', dark ? mixHex(LOOK.accent, '#ffffff', 0.38) : LOOK.accent);
+  root.style.setProperty('--accent-soft', dark ? mixHex(LOOK.accent, '#1e222b', 0.68) : mixHex(LOOK.accent, '#ffffff', 0.86));
+  root.style.setProperty('--on-accent', dark ? '#0f1424' : '#ffffff');
+  if (LOOK.desk) root.style.setProperty('--desk', LOOK.desk); else root.style.removeProperty('--desk');
+  root.style.setProperty('--uiz', LOOK.ui || 1);
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = LOOK.accent;
+}
+function saveLook(){ LS.set('caderno.look', JSON.stringify(LOOK)); applyLook(); if (typeof S !== 'undefined' && S.nb) { sizeCanvases(); clampView(); applyView(); renderAll(); } }
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyLook); } catch(e){}
+function openAppearance(){
+  return openDialog((box, close) => {
+    box.innerHTML = '<h3>Aparência do app</h3><div id="lookBody" style="display:flex;flex-direction:column;gap:16px"></div><div class="actions"><button class="btn primary" type="button" data-a="ok">Pronto</button></div>';
+    const body = box.querySelector('#lookBody');
+    const section = (title, build) => { const d = document.createElement('div'); const l = document.createElement('label'); l.className = 'l'; l.textContent = title; const r = document.createElement('div'); r.className = 'row'; d.append(l, r); build(r); body.appendChild(d); };
+    const chips = (row, list, cur, onPick) => list.forEach(([v, t]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t; b.setAttribute('aria-pressed', v === cur); b.onclick = () => { row.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === b)); onPick(v); }; row.appendChild(b); });
+    section('Tema', r => chips(r, [['auto', 'Automático'], ['light', 'Claro'], ['dark', 'Escuro']], LOOK.theme, v => { LOOK.theme = v; saveLook(); }));
+    section('Cor do app', r => ACCENTS.forEach(([c, t]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'covsw'; b.style.setProperty('--c', c); b.title = t; b.setAttribute('aria-label', 'Cor ' + t); b.setAttribute('aria-pressed', c === LOOK.accent); b.onclick = () => { r.querySelectorAll('.covsw').forEach(x => x.setAttribute('aria-pressed', x === b)); LOOK.accent = c; saveLook(); }; r.appendChild(b); }));
+    section('Fundo atrás da folha', r => DESKS.forEach(([c, t]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'covsw'; b.style.setProperty('--c', c || '#dfe3ea'); b.title = t; b.setAttribute('aria-label', 'Fundo ' + t); b.setAttribute('aria-pressed', c === LOOK.desk); b.onclick = () => { r.querySelectorAll('.covsw').forEach(x => x.setAttribute('aria-pressed', x === b)); LOOK.desk = c; saveLook(); }; r.appendChild(b); }));
+    section('Tamanho dos botões e textos', r => chips(r, UI_SIZES, LOOK.ui || 1, v => { LOOK.ui = v; saveLook(); }));
+    const note = document.createElement('p'); note.textContent = 'As mudanças aparecem na hora e ficam salvas neste aparelho.'; body.appendChild(note);
+    box.querySelector('[data-a=ok]').onclick = () => close(true);
+  });
+}
+applyLook();
+
+/* ================================================================
    Avisos, diálogos, menus, painéis
    ================================================================ */
 let toastTimer = null;
@@ -651,7 +699,9 @@ function flowerPath(c, x, y, r, petal, center){
   c.fillStyle = center; c.beginPath(); c.arc(x, y, r * 0.35, 0, Math.PI * 2); c.fill();
 }
 const COVER_ARTS = [['', 'Nenhuma'], ['frasco', 'Erlenmeyer'], ['atomo', 'Átomo'], ['livros', 'Livros'], ['lapis', 'Lápis'], ['montanhas', 'Montanhas'],
-  ['lua', 'Lua e estrelas'], ['cafe', 'Café'], ['planta', 'Plantinha'], ['arcoiris', 'Arco-íris'], ['borboleta', 'Borboleta'], ['coracao', 'Corações']];
+  ['lua', 'Lua e estrelas'], ['cafe', 'Café'], ['planta', 'Plantinha'], ['arcoiris', 'Arco-íris'], ['borboleta', 'Borboleta'], ['coracao', 'Corações'],
+  ['microscopio', 'Microscópio'], ['tubos', 'Tubos de ensaio'], ['molecula', 'Molécula'], ['dna', 'DNA'], ['tabela', 'Tabela periódica'], ['gato', 'Gatinho'],
+  ['sol', 'Sol e nuvem'], ['globo', 'Planeta'], ['musica', 'Música'], ['foguete', 'Foguete'], ['flores', 'Flores'], ['cadente', 'Estrela cadente']];
 /* Ilustrações originais desenhadas em um quadro de 100 x 100, encaixadas na parte de baixo da capa */
 function drawArt(c, kind, w, h, col){
   if (!kind) return;
@@ -712,6 +762,69 @@ function drawArt(c, kind, w, h, col){
   } else if (kind === 'coracao') {
     c.fillStyle = P; heartPath(c, 50, 30, 60); c.beginPath(); c.moveTo(50, 48); c.stroke();
     c.fillStyle = '#e85d5d'; heartPath(c, 18, 18, 18); c.fillStyle = Y; heartPath(c, 84, 60, 16); c.fillStyle = V; heartPath(c, 16, 72, 14);
+  } else if (kind === 'microscopio') {
+    c.beginPath(); c.rect(18, 86, 64, 9); fillStroke(paperC);
+    c.lineWidth = 7; c.beginPath(); c.moveTo(66, 86); c.quadraticCurveTo(76, 56, 58, 30); c.strokeStyle = ink; c.stroke(); c.lineWidth = 3;
+    c.beginPath(); c.rect(26, 62, 44, 6); fillStroke(paperC);
+    c.save(); c.translate(46, 38); c.rotate(-0.45); c.beginPath(); c.rect(-7, -26, 14, 42); fillStroke(paperC); c.beginPath(); c.rect(-9, -33, 18, 8); fillStroke(soft); c.beginPath(); c.rect(-4, 16, 8, 8); fillStroke(soft); c.restore();
+    circ(50, 74, 4, B);
+  } else if (kind === 'tubos') {
+    [[26, P], [50, G], [74, B]].forEach(([x, f], i) => {
+      c.beginPath(); c.moveTo(x - 8, 10); c.lineTo(x - 8, 70); c.arc(x, 70, 8, Math.PI, 0, true); c.lineTo(x + 8, 10); c.closePath(); c.fillStyle = paperC; c.fill();
+      c.save(); c.clip(); c.fillStyle = f; c.fillRect(x - 9, 44 + i * 6, 18, 40); c.restore();
+      c.beginPath(); c.moveTo(x - 8, 10); c.lineTo(x - 8, 70); c.arc(x, 70, 8, Math.PI, 0, true); c.lineTo(x + 8, 10); c.stroke();
+    });
+    c.beginPath(); c.rect(8, 58, 84, 8); fillStroke('#c08a5a'); c.beginPath(); c.rect(12, 66, 7, 28); fillStroke('#c08a5a'); c.beginPath(); c.rect(81, 66, 7, 28); fillStroke('#c08a5a');
+  } else if (kind === 'molecula') {
+    const pts = [[18, 26, P], [84, 30, B], [22, 84, G], [80, 82, Y]];
+    for (const [x, y] of pts) { c.beginPath(); c.moveTo(50, 55); c.lineTo(x, y); c.lineWidth = 5; c.stroke(); } c.lineWidth = 3;
+    circ(50, 55, 15, ink === '#ffffff' ? '#fff' : '#4a5163'); for (const [x, y, f] of pts) circ(x, y, 10, f);
+  } else if (kind === 'dna') {
+    const A = [], Bp = [];
+    for (let i = 0; i <= 40; i++) { const t = i / 40, y = 6 + t * 88, s2 = Math.sin(t * Math.PI * 3); A.push([50 + 26 * s2, y]); Bp.push([50 - 26 * s2, y]); }
+    for (let i = 2; i < 40; i += 4) { c.beginPath(); c.moveTo(A[i][0], A[i][1]); c.lineTo(Bp[i][0], Bp[i][1]); c.strokeStyle = [P, B, G, Y][(i / 4 | 0) % 4]; c.lineWidth = 4; c.stroke(); }
+    c.strokeStyle = ink; c.lineWidth = 5; for (const L of [A, Bp]) { c.beginPath(); L.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); } c.lineWidth = 3;
+  } else if (kind === 'tabela') {
+    const rows = [[0, 8], [0, 1, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8]];
+    const colr = col => col < 2 ? P : col < 3 ? Y : col < 7 ? B : col < 8 ? G : V;
+    rows.forEach((r, ri) => r.forEach(col => { c.beginPath(); c.rect(4 + col * 10.5, 24 + ri * 11, 9, 9); c.fillStyle = colr(col); c.fill(); c.lineWidth = 1.2; c.stroke(); }));
+    c.lineWidth = 3; for (let col = 2; col < 9; col++) { c.beginPath(); c.rect(4 + col * 10.5, 84, 9, 9); c.fillStyle = soft; c.fill(); c.lineWidth = 1.2; c.stroke(); } c.lineWidth = 3;
+  } else if (kind === 'gato') {
+    c.beginPath(); c.moveTo(24, 46); c.lineTo(26, 14); c.lineTo(44, 32); c.closePath(); fillStroke(paperC); c.beginPath(); c.moveTo(76, 46); c.lineTo(74, 14); c.lineTo(56, 32); c.closePath(); fillStroke(paperC);
+    c.beginPath(); c.ellipse(50, 60, 32, 28, 0, 0, Math.PI * 2); fillStroke(paperC);
+    c.fillStyle = '#2a2f3a'; c.beginPath(); c.ellipse(38, 56, 4, 6, 0, 0, 7); c.fill(); c.beginPath(); c.ellipse(62, 56, 4, 6, 0, 0, 7); c.fill();
+    c.fillStyle = P; c.beginPath(); c.moveTo(46, 66); c.lineTo(54, 66); c.lineTo(50, 71); c.closePath(); c.fill(); circ(30, 70, 5, 'rgba(242,143,173,.6)', true); circ(70, 70, 5, 'rgba(242,143,173,.6)', true);
+    c.strokeStyle = '#2a2f3a'; c.lineWidth = 1.8; for (const s2 of [-1, 1]) for (const dy of [-3, 3]) { c.beginPath(); c.moveTo(50 + s2 * 10, 70 + dy); c.lineTo(50 + s2 * 30, 68 + dy * 2); c.stroke(); }
+    c.strokeStyle = ink; c.lineWidth = 3;
+  } else if (kind === 'sol') {
+    for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5; c.beginPath(); c.moveTo(38 + Math.cos(a) * 22, 36 + Math.sin(a) * 22); c.lineTo(38 + Math.cos(a) * 30, 36 + Math.sin(a) * 30); c.strokeStyle = Y; c.lineWidth = 4; c.stroke(); }
+    c.strokeStyle = ink; c.lineWidth = 3; circ(38, 36, 17, Y);
+    c.beginPath(); c.arc(50, 78, 12, Math.PI * 0.5, Math.PI * 1.5); c.arc(64, 66, 16, Math.PI, 0); c.arc(80, 78, 12, Math.PI * 1.5, Math.PI * 0.5); c.closePath(); fillStroke('#fff');
+  } else if (kind === 'globo') {
+    circ(50, 52, 38, B);
+    c.save(); c.beginPath(); c.arc(50, 52, 38, 0, Math.PI * 2); c.clip(); c.fillStyle = G;
+    c.beginPath(); c.ellipse(36, 38, 16, 11, -0.4, 0, 7); c.fill(); c.beginPath(); c.ellipse(62, 66, 14, 18, 0.5, 0, 7); c.fill(); c.beginPath(); c.ellipse(70, 30, 8, 6, 0, 0, 7); c.fill(); c.restore();
+    c.beginPath(); c.arc(50, 52, 38, 0, Math.PI * 2); c.stroke();
+    c.save(); c.translate(50, 52); c.rotate(-0.35); c.beginPath(); c.ellipse(0, 0, 50, 12, 0, Math.PI * 0.08, Math.PI * 0.92); c.strokeStyle = Y; c.lineWidth = 4; c.stroke(); c.restore(); c.strokeStyle = ink; c.lineWidth = 3;
+  } else if (kind === 'musica') {
+    c.save(); c.fillStyle = ink === '#ffffff' ? '#fff' : '#2a2f3a';
+    c.beginPath(); c.ellipse(30, 80, 11, 8, -0.4, 0, 7); c.fill(); c.beginPath(); c.ellipse(72, 72, 11, 8, -0.4, 0, 7); c.fill();
+    c.lineWidth = 4; c.strokeStyle = c.fillStyle; c.beginPath(); c.moveTo(40, 78); c.lineTo(40, 22); c.moveTo(82, 70); c.lineTo(82, 14); c.stroke();
+    c.beginPath(); c.moveTo(40, 22); c.lineTo(82, 14); c.lineTo(82, 26); c.lineTo(40, 34); c.closePath(); c.fill(); c.restore();
+    c.fillStyle = P; heartPath(c, 14, 30, 12); c.fillStyle = Y; starPath(c, 90, 48, 6);
+  } else if (kind === 'foguete') {
+    c.beginPath(); c.moveTo(50, 6); c.bezierCurveTo(70, 22, 68, 56, 62, 72); c.lineTo(38, 72); c.bezierCurveTo(32, 56, 30, 22, 50, 6); c.closePath(); fillStroke(paperC);
+    circ(50, 38, 9, B);
+    c.beginPath(); c.moveTo(38, 58); c.lineTo(24, 78); c.lineTo(38, 72); c.closePath(); fillStroke(P); c.beginPath(); c.moveTo(62, 58); c.lineTo(76, 78); c.lineTo(62, 72); c.closePath(); fillStroke(P);
+    c.beginPath(); c.moveTo(42, 74); c.quadraticCurveTo(50, 100, 58, 74); c.closePath(); fillStroke(Y);
+  } else if (kind === 'flores') {
+    const fl = (x, y, f) => { c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + 4, y + 30, 50, 96); c.strokeStyle = '#4fae74'; c.lineWidth = 3.5; c.stroke(); c.strokeStyle = ink; c.lineWidth = 3;
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; c.beginPath(); c.ellipse(x + Math.cos(a) * 9, y + Math.sin(a) * 9, 7, 7, 0, 0, 7); c.fillStyle = f; c.fill(); } circ(x, y, 6, Y); };
+    fl(28, 40, P); fl(72, 34, V); fl(50, 22, '#f2a65a');
+    c.beginPath(); c.ellipse(40, 80, 10, 5, -0.6, 0, 7); c.fillStyle = G; c.fill(); c.beginPath(); c.ellipse(60, 84, 10, 5, 0.6, 0, 7); c.fill();
+  } else if (kind === 'cadente') {
+    [[P, 0], [B, 10], [V, 20]].forEach(([f, o]) => { c.beginPath(); c.moveTo(56 - o * 0.3, 44 + o * 0.7); c.lineTo(8 + o * 0.4, 86 - o * 0.2); c.strokeStyle = f; c.lineWidth = 5; c.stroke(); });
+    c.strokeStyle = ink; c.lineWidth = 3; c.fillStyle = Y; starPath(c, 66, 34, 26); c.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? 26 * 0.45 : 26; c.lineTo(66 + rr * Math.cos(a), 34 + rr * Math.sin(a)); } c.closePath(); c.stroke();
   }
   c.restore();
 }
@@ -754,6 +867,7 @@ function drawCover(cv, cover, dpr, retried){
     else if (loading && !retried) loading.then(() => { if (cv.isConnected) drawCover(cv, cover, dpr, true); });
   }
   if (cover.art && !cover.photoId) drawArt(c, cover.art, w, h, col);
+  if (cover.sticker && !cover.photoId && !cover.art) { const sz = Math.min(w * 0.5, h * 0.34); c.font = Math.round(sz) + 'px ' + EMOJI_FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(cover.sticker, w / 2 + 7, h * 0.72); }
   if (cover.style === 'espiral') {
     c.fillStyle = 'rgba(0,0,0,.08)'; c.fillRect(0, 0, 18, h);
     for (let y = 10; y < h - 4; y += 12) {
@@ -849,6 +963,50 @@ const TEMPLATES = {
   'pontos':            { name: 'Pontilhado', cat: 'Básicos', draw(c){ tDots(c, 36); } },
   'pontos-estreitos':  { name: 'Pontos estreitos', cat: 'Básicos', draw(c){ tDots(c, 24); } },
   'pontos-espacados':  { name: 'Pontos espaçados', cat: 'Básicos', draw(c){ tDots(c, 54); } },
+  // ---------- Provas e estudo ----------
+  'conteudo': { name: 'Conteúdo programático', cat: 'Provas e estudo', help: 'Liste os tópicos da prova e marque o andamento de cada um: vi, resumi e revisei. Marque também a dificuldade.', draw(c){
+      tText(c, 'Conteúdo da prova', 50, 78, 38, '#2f3850', 700);
+      tText(c, 'Matéria:', 50, 128, 20); tHL(c, 140, 640, 130); tText(c, 'Prova em:', 50, 172, 20); tHL(c, 150, 420, 174); tText(c, 'Professor(a):', 440, 172, 20); tHL(c, 580, 640, 174);
+      tBox(c, 690, 40, 260, 140, { fill: '#fff4e5', col: '#efc27a' }); tText(c, 'Faltam', 820, 86, 20, '#a0651f', 700, 'center'); tText(c, '______ dias', 820, 140, 26, '#a0651f', 700, 'center');
+      const cols = [56, 420, 130, 220, 124], x0 = 50, y0 = 210, rh = 56, rows = 20;
+      tTable(c, x0, y0, cols, rh, rows, ['Nº', 'Tópico', 'Aula/pág.', 'Vi · Resumi · Revisei', 'Dificuldade']);
+      const cx = x0 + cols[0] + cols[1] + cols[2], dx = cx + cols[3];
+      for (let r = 1; r <= rows; r++) {
+        const y = y0 + rh * r + rh / 2;
+        tText(c, String(r), x0 + cols[0] / 2, y + 7, 17, '#8090ad', 600, 'center');
+        [['#7cc4f0'], ['#6cc18a'], ['#a98be8']].forEach(([col], i) => { c.strokeStyle = col; c.lineWidth = 2.2 * LW; c.beginPath(); c.arc(cx + 45 + i * 65, y, 13, 0, Math.PI * 2); c.stroke(); });
+        for (let i = 0; i < 3; i++) { c.strokeStyle = '#c9b48a'; c.lineWidth = 1.6 * LW; c.beginPath(); c.arc(dx + 30 + i * 32, y, 9, 0, Math.PI * 2); c.stroke(); }
+      } } },
+  'revisao': { name: 'Plano de revisão (14 dias)', cat: 'Provas e estudo', help: 'Distribua o conteúdo nos dias que faltam até a prova. Use as cores da legenda para cada tipo de estudo.', draw(c){
+      tText(c, 'Plano de revisão', 50, 78, 38, '#2f3850', 700);
+      tText(c, 'Prova:', 50, 126, 20); tHL(c, 120, 560, 128); tText(c, 'Data:', 600, 126, 20); tHL(c, 660, 950, 128);
+      [['Leitura', '#7cc4f0'], ['Resumo', '#6cc18a'], ['Exercícios', '#f2a65a'], ['Revisão', '#a98be8']].forEach(([t, col], i) => { const x = 50 + i * 230; tBox(c, x, 150, 26, 26, { r: 6, fill: col, col }); tText(c, t, x + 36, 170, 18, HEAD, 600); });
+      const bw = (W - 130) / 2, bh = 158, y0 = 200;
+      for (let d = 0; d < 14; d++) {
+        const x = 50 + (d % 2) * (bw + 30), y = y0 + Math.floor(d / 2) * (bh + 12);
+        tBox(c, x, y, bw, bh, d === 13 ? { fill: '#fff4e5', col: '#efc27a' } : {}); tText(c, d === 13 ? 'Véspera' : 'Dia ' + (d + 1), x + 16, y + 30, 19, d === 13 ? '#a0651f' : HEAD, 700); tText(c, '___/___', x + bw - 16, y + 30, 16, '#8090ad', 600, 'right');
+        for (let k = 0; k < 3; k++) { tCheck(c, x + 16, y + 50 + k * 34, 18); tHL(c, x + 44, x + bw - 16, y + 68 + k * 34, '#e1e7f1'); }
+      } } },
+  'topico': { name: 'Resumo de tópico', cat: 'Provas e estudo', snap: [380, 38], help: 'Um tópico por página: o que cai, conceitos, fórmulas, um exemplo resolvido e as pegadinhas. Marque as revisões em 1, 7 e 30 dias.', draw(c){
+      tText(c, 'Tópico:', 50, 78, 30, '#2f3850', 700); tHL(c, 170, 950, 80);
+      tText(c, 'Matéria:', 50, 124, 19); tHL(c, 135, 560, 126); tText(c, 'Aula/pág.:', 590, 124, 19); tHL(c, 690, 950, 126);
+      tBox(c, 50, 150, W - 100, 150, { fill: '#fff4e5', col: '#efc27a' }); tText(c, 'O que cai na prova', 70, 184, 19, '#a0651f', 700);
+      tText(c, 'Conceitos e definições', 60, 340, 19, HEAD, 700); tLines(c, 380, 38, LINE, 60, W - 60, 640);
+      const hw = (W - 120) / 2;
+      tBox(c, 50, 670, hw, 330); tText(c, 'Fórmulas e reações', 70, 704, 19, HEAD, 700); tGrid(c, 28, '#e4e9f2', 50, 715, 50 + hw, 1000);
+      tBox(c, 70 + hw, 670, hw, 330); tText(c, 'Exemplo resolvido', 90 + hw, 704, 19, HEAD, 700); tLines(c, 746, 36, '#e1e7f1', 90 + hw, W - 70, 985);
+      tBox(c, 50, 1020, W - 100, 200, { fill: '#fdecec', col: '#e9a5a5' }); tText(c, 'Pegadinhas e erros comuns', 70, 1054, 19, '#b0413e', 700); tLines(c, 1094, 36, '#f1cccc', 70, W - 70, 1205);
+      tText(c, 'Revisei em:', 50, 1272, 19, HEAD, 700); ['1 dia', '7 dias', '30 dias'].forEach((t, i) => { tCheck(c, 175 + i * 150, 1254, 22); tText(c, t, 207 + i * 150, 1272, 18, HEAD, 600); });
+      tText(c, 'Confiança:', 50, 1332, 19, HEAD, 700); for (let i = 1; i <= 5; i++) { tBox(c, 170 + (i - 1) * 56, 1306, 40, 40, { r: 20, col: '#c9d2e2' }); tText(c, String(i), 190 + (i - 1) * 56, 1333, 18, '#8090ad', 700, 'center'); } } },
+  'autoteste': { name: 'Autoteste (pergunta e resposta)', cat: 'Provas e estudo', help: 'Escreva a pergunta à esquerda e a resposta à direita. Para estudar, cubra a direita com uma fita lisa e tente responder.', draw(c){
+      tText(c, 'Autoteste', 50, 78, 38, '#2f3850', 700); tText(c, 'Cubra a coluna da direita e tente responder.', 50, 116, 18, '#8090ad', 600);
+      const mid = W / 2, y0 = 150, rh = 140;
+      tText(c, 'Pergunta', 60, y0 + 30, 20, HEAD, 700); tText(c, 'Resposta', mid + 20, y0 + 30, 20, HEAD, 700);
+      c.setLineDash([10, 8]); tVL(c, mid, y0, H - 40, '#9fb0cc', 2); c.setLineDash([]);
+      for (let r = 0; r < 9; r++) { const y = y0 + 46 + r * rh; tText(c, 'P' + (r + 1), 60, y + 30, 16, '#8090ad', 700); tHL(c, 50, W - 50, y + rh, '#d3dbe8'); c.strokeStyle = '#6cc18a'; c.lineWidth = 2 * LW; c.beginPath(); c.arc(W - 110, y + rh - 26, 12, 0, 7); c.stroke(); c.strokeStyle = '#e85d5d'; c.beginPath(); c.arc(W - 74, y + rh - 26, 12, 0, 7); c.stroke(); } } },
+  'erros': { name: 'Caderno de erros', cat: 'Provas e estudo', help: 'Anote cada questão que você errou, por que errou e como acertar. Revise esta página antes da prova.', draw(c){
+      tText(c, 'Caderno de erros', 50, 78, 38, '#2f3850', 700); tText(c, 'Matéria:', 50, 124, 19); tHL(c, 135, 560, 126);
+      tTable(c, 50, 160, [300, 250, 280, 70], 96, 12, ['Questão / conteúdo', 'Onde errei', 'Como acertar', '✓']); } },
   // ---------- Acadêmico ----------
   'horario':     { name: 'Horário de aulas', cat: 'Acadêmico', draw(c){ tTitle(c, 'Horário de aulas', { date: false }); tTable(c, 50, 140, [130, 136, 136, 136, 136, 136, 130], 104, 11, ['Horário','Seg','Ter','Qua','Qui','Sex','Sáb']); } },
   'provas':      { name: 'Provas e trabalhos', cat: 'Acadêmico', draw(c){ tTitle(c, 'Provas e trabalhos', { date: false }); tTable(c, 50, 140, [120, 220, 380, 100, 80], 56, 20, ['Data','Matéria','Conteúdo','Nota','✓']); } },
@@ -929,7 +1087,7 @@ const TEMPLATES = {
 };
 const TPL_ALIASES = { pautado: 'linha', quadriculado: 'grade', pontilhado: 'pontos' };
 const tplKey = k => TPL_ALIASES[k] || (TEMPLATES[k] ? k : 'linha');
-const CATS = ['Básicos', 'Acadêmico', 'Planners', 'Diários', 'Criativo', 'Personalizado'];
+const CATS = ['Básicos', 'Provas e estudo', 'Acadêmico', 'Planners', 'Diários', 'Criativo', 'Personalizado'];
 function drawTemplate(c, tpl, o, lwMul){
   o = o || {}; LW = lwMul || 1;
   c.fillStyle = o.paper || '#ffffff'; c.fillRect(0, 0, W, H);
@@ -1363,6 +1521,7 @@ function coverDialog(nb, presetName){
       </div>
       <div><label class="l">Tema da capa</label><div class="theme-grid" id="thRow"></div></div>
       <div><label class="l">Ilustração</label><div class="theme-grid" id="artRow"></div></div>
+      <div><label class="l">Figurinha grande na capa</label><div class="row"><button type="button" class="chip" id="stkPick">Escolher figurinha</button><span id="stkNow" class="emo-big"></span><button type="button" class="chip" id="stkDel">Tirar figurinha</button></div></div>
       <div><label class="l">Foto de capa</label><div class="row"><button type="button" class="chip" id="photoBtn">Escolher foto da galeria</button><button type="button" class="chip" id="photoDel">Remover foto</button><input type="file" accept="image/*" id="photoIn" class="hidden"></div></div>
       <div><label class="l">Enfeite</label><div class="row" id="emRow"></div></div>
       <div><label class="l">${editing ? 'Modelo para novas páginas' : 'Modelo das folhas'}</label><div class="row"><button type="button" class="chip" id="tplBtn"></button></div></div>
@@ -1386,7 +1545,16 @@ function coverDialog(nb, presetName){
     COVER_THEMES.forEach(([k, l]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'theme'; b.setAttribute('aria-pressed', cover.theme === k); const c = document.createElement('canvas'); c.dataset.k = k; b.appendChild(c); b.append(l); b.onclick = () => { cover.theme = k; thRow.querySelectorAll('.theme').forEach(x => x.setAttribute('aria-pressed', x === b)); redraw(); }; thRow.appendChild(b); });
     const artRow = box.querySelector('#artRow');
     COVER_ARTS.forEach(([k, l]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'theme'; b.setAttribute('aria-pressed', (cover.art || '') === k); const c = document.createElement('canvas'); c.dataset.k = k; c.style.height = '64px'; b.appendChild(c); b.append(l);
-      b.onclick = () => { cover.art = k; if (k) { delete cover.photoId; syncPhoto(); } artRow.querySelectorAll('.theme').forEach(x => x.setAttribute('aria-pressed', x === b)); redraw(); }; artRow.appendChild(b); });
+      b.onclick = () => { cover.art = k; if (k) { delete cover.photoId; delete cover.sticker; syncPhoto(); syncStk(); } artRow.querySelectorAll('.theme').forEach(x => x.setAttribute('aria-pressed', x === b)); redraw(); }; artRow.appendChild(b); });
+    const stkNow = box.querySelector('#stkNow'), stkDel = box.querySelector('#stkDel');
+    const syncStk = () => { stkNow.textContent = cover.sticker || ''; stkDel.classList.toggle('hidden', !cover.sticker); };
+    syncStk();
+    stkDel.onclick = () => { delete cover.sticker; syncStk(); redraw(); };
+    box.querySelector('#stkPick').onclick = async () => {
+      const e = await pickSticker('Figurinha da capa'); if (!e) return;
+      cover.sticker = e; cover.art = ''; delete cover.photoId; syncPhoto(); syncStk();
+      artRow.querySelectorAll('.theme').forEach((x, i) => x.setAttribute('aria-pressed', i === 0)); redraw();
+    };
     const photoBtn = box.querySelector('#photoBtn'), photoDel = box.querySelector('#photoDel'), photoIn = box.querySelector('#photoIn');
     const syncPhoto = () => { photoDel.classList.toggle('hidden', !cover.photoId); photoBtn.textContent = cover.photoId ? 'Trocar foto' : 'Escolher foto da galeria'; };
     syncPhoto();
@@ -1405,7 +1573,7 @@ function coverDialog(nb, presetName){
         const url = cvp.toDataURL('image/jpeg', 0.8), id = newId(), sharedNb = !!(nb && nb.shared);
         const ready = new Image(); ready.src = url; await new Promise(r => { ready.onload = r; ready.onerror = r; });
         const n = await saveImage(id, url, sharedNb); imgCache.set(id, { url, img: ready });
-        cover.photoId = id; cover.photoN = n; cover.photoSh = sharedNb; cover.art = '';
+        cover.photoId = id; cover.photoN = n; cover.photoSh = sharedNb; cover.art = ''; delete cover.sticker; syncStk();
         artRow.querySelectorAll('.theme').forEach((x, i) => x.setAttribute('aria-pressed', i === 0));
         syncPhoto(); redraw();
       } catch (e) { toast('Não consegui abrir essa foto.'); syncPhoto(); }
@@ -1432,21 +1600,25 @@ function pickTemplate(curTpl, curTo, title){
     openSheet(title || 'Modelo da página', (body, sheet) => {
       const foot = document.createElement('div'); foot.className = 'sheet-foot'; sheet.appendChild(foot);
       const thumbs = [];
-      const drawThumb = (cv, key) => { const x = cv.getContext('2d'); const sc = cv.width / W; x.setTransform(sc, 0, 0, sc, 0, 0); drawTemplate(x, key, key === 'custom' ? to : Object.assign({}, to), 2.2); };
+      const drawThumb = (cv, key) => { const x = cv.getContext('2d'); const sc = cv.width / W; x.setTransform(sc, 0, 0, sc, 0, 0); drawTemplate(x, key, key === 'custom' ? to : Object.assign({}, to), cv.width > 400 ? 1.3 : 2.2); };
       const draw = () => {
         body.innerHTML = '';
         const tabs = document.createElement('div'); tabs.className = 'tabs';
         CATS.forEach(k => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = k; b.setAttribute('aria-pressed', k === cat); b.onclick = () => { cat = k; if (k === 'Personalizado') { tpl = 'custom'; to.pat = to.pat || 'linhas'; to.sp = to.sp || 40; } draw(); }; tabs.appendChild(b); });
         body.appendChild(tabs);
+        const lay = document.createElement('div'); lay.className = 'tpl-layout';
+        const big = document.createElement('div'); big.className = 'tpl-big';
+        bigCv = document.createElement('canvas'); bigCv.width = 700; bigCv.height = 990; bigName = document.createElement('b'); bigHelp = document.createElement('small');
+        big.append(bigCv, bigName, bigHelp); lay.appendChild(big);
         const grid = document.createElement('div'); grid.className = 'tpl-grid'; thumbs.length = 0;
         for (const k in TEMPLATES) {
           if (TEMPLATES[k].cat !== cat) continue;
           const b = document.createElement('button'); b.type = 'button'; b.className = 'tpl'; b.setAttribute('aria-pressed', k === tpl);
           const cv = document.createElement('canvas'); cv.width = 240; cv.height = 339; b.appendChild(cv); b.append(TEMPLATES[k].name);
-          b.onclick = () => { tpl = k; grid.querySelectorAll('.tpl').forEach(x => x.setAttribute('aria-pressed', x === b)); drawFoot(); };
+          b.onclick = () => { tpl = k; grid.querySelectorAll('.tpl').forEach(x => x.setAttribute('aria-pressed', x === b)); drawFoot(); drawBig(); };
           grid.appendChild(b); thumbs.push([cv, k]);
         }
-        body.appendChild(grid);
+        lay.appendChild(grid); body.appendChild(lay);
         if (cat === 'Personalizado') {
           const panel = document.createElement('div'); panel.style.cssText = 'display:flex;flex-direction:column;gap:12px;margin-top:14px';
           const pats = document.createElement('div'); pats.className = 'row';
@@ -1464,7 +1636,9 @@ function pickTemplate(curTpl, curTo, title){
         }
         refresh(); drawFoot();
       };
-      const refresh = () => thumbs.forEach(([cv, k]) => drawThumb(cv, k));
+      let bigCv = null, bigName = null, bigHelp = null;
+      const drawBig = () => { if (!bigCv) return; drawThumb(bigCv, tpl); bigName.textContent = TEMPLATES[tpl].name; bigHelp.textContent = TEMPLATES[tpl].help || ''; };
+      const refresh = () => { thumbs.forEach(([cv, k]) => drawThumb(cv, k)); drawBig(); };
       const drawFoot = () => {
         foot.innerHTML = '';
         const pc = document.createElement('div'); pc.className = 'row'; pc.append('Papel ');
@@ -1550,6 +1724,8 @@ async function shareNotebook(nb){
 $('#newNb').onclick = async () => { const nb = await createNotebook(); if (nb) openNotebook(nb.id); };
 $('#newNb2').onclick = $('#newNb').onclick;
 $('#homeMore').onclick = () => showMenu($('#homeMore'), [
+  { text: 'Aparência do app', run: openAppearance },
+  '-',
   { label: 'Cópia de segurança' },
   ...(downloads ? [{ text: 'Fazer backup de todos os cadernos', run: makeBackup }] : []),
   { text: 'Restaurar um backup', run: () => { $('#backupInput').value = ''; $('#backupInput').click(); } }
@@ -1619,8 +1795,8 @@ async function openNotebook(id){
   setTitle();
   setStatus(mode === 'db' ? 'ok' : 'local');
   buildCtx(); syncToolUI();
+  if (!nb.pages || !nb.pages.length) { nb.pages = nb.pages || []; nb.pages.push({ id: newId(), tpl: nb.tpl, to: nb.to, chunks: 0 }); touchNb(nb); }   // caderno vazio (ex.: PDF cancelado)
   sizeCanvases(); fitView();
-  if (!nb.pages.length) { nb.pages.push({ id: newId(), tpl: nb.tpl, to: nb.to, chunks: 0 }); touchNb(nb); }
   await showPage(0);
   if (!LS.get('caderno.penAsk')) {
     LS.set('caderno.penAsk', '1');
@@ -1909,15 +2085,54 @@ function penTest(){
 
 /* ---------- Painel da caneta (com a imagem de cada caneta) ---------- */
 const levGamma = lev => Math.pow(2, (50 - lev) / 35);
+/* Alisa o traço: refaz os pontos com espaçamento igual e tira o tremido com uma média ponderada.
+   amt = 0 (nada) a 1 (bem liso). As pontas ficam no lugar. */
+function smoothPts(P, amt){
+  const n = P.length / 3;
+  if (n < 5 || !(amt > 0.02)) return P;
+  // 1) reamostra a cada ~1,2 unidades (assim a força não depende da velocidade da mão)
+  const step = 1.2, R = [P[0], P[1], P[2]];
+  let need = step;
+  for (let i = 3; i < P.length; i += 3) {
+    let ax = P[i-3], ay = P[i-2], ap = P[i-1]; const bx = P[i], by = P[i+1], bp = P[i+2];
+    let seg = Math.hypot(bx - ax, by - ay);
+    while (seg >= need && seg > 0) {
+      const t = need / seg; ax += (bx - ax) * t; ay += (by - ay) * t; ap += (bp - ap) * t;
+      R.push(ax, ay, ap); seg = Math.hypot(bx - ax, by - ay); need = step;
+    }
+    need -= seg;
+  }
+  R.push(P[P.length-3], P[P.length-2], P[P.length-1]);
+  const m = R.length / 3; if (m < 5) return P;
+  // 2) média ponderada (janela triangular); raio de até ~10 unidades conforme o ajuste
+  const rad = Math.max(1, Math.round(amt * 8));
+  let A = R;
+  for (let pass = 0; pass < 2; pass++) {
+    const O = A.slice();
+    for (let i = 1; i < m - 1; i++) {
+      const r = Math.min(rad, i, m - 1 - i); if (r < 1) continue;
+      let sx = 0, sy = 0, sp = 0, sw = 0;
+      for (let j = -r; j <= r; j++) { const w = r + 1 - Math.abs(j), k = (i + j) * 3; sx += A[k] * w; sy += A[k+1] * w; sp += A[k+2] * w; sw += w; }
+      O[i*3] = sx / sw; O[i*3+1] = sy / sw; O[i*3+2] = sp / sw;
+    }
+    A = O;
+  }
+  // 3) tira pontos quase repetidos para o arquivo não crescer
+  const out = [A[0], A[1], A[2]];
+  for (let i = 3; i < A.length; i += 3) { const lx = out[out.length-3], ly = out[out.length-2]; if (Math.hypot(A[i] - lx, A[i+1] - ly) >= 1.0 || i === A.length - 3) out.push(A[i], A[i+1], A[i+2]); }
+  return out;
+}
 function sampleStroke(type, cfg, color, x0, y0, len, amp){
   const pts = [], g = levGamma(cfg.lev);
   for (let t = 0; t <= 1.0001; t += 0.004) {
-    const x = x0 + len * t + amp * 0.75 * Math.cos(2 * Math.PI * 5 * t + Math.PI);
-    const y = y0 - amp * Math.sin(2 * Math.PI * 5 * t) - amp * 0.25 * Math.sin(Math.PI * t);
+    // um pouco de "tremido" de mão, para a prévia mostrar o efeito da suavização
+    const jx = Math.sin(t * 431) * amp * 0.06 + Math.sin(t * 977) * amp * 0.04, jy = Math.cos(t * 613) * amp * 0.06 + Math.sin(t * 1201) * amp * 0.04;
+    const x = x0 + len * t + amp * 0.75 * Math.cos(2 * Math.PI * 5 * t + Math.PI) + jx;
+    const y = y0 - amp * Math.sin(2 * Math.PI * 5 * t) - amp * 0.25 * Math.sin(Math.PI * t) + jy;
     const p = Math.pow(0.25 + 0.65 * (0.5 + 0.5 * Math.sin(2 * Math.PI * 2.2 * t)), g);
     pts.push(x, y, p);
   }
-  return { t: type, c: color, w: cfg.w, k: cfg.k / 100, pts };
+  return { t: type, c: color, w: cfg.w, k: cfg.k / 100, pts: smoothPts(pts, cfg.suav / 100) };
 }
 function drawPreview(cv, type, cfg, color, scale){
   const dpr = window.devicePixelRatio || 1, r = cv.getBoundingClientRect();
@@ -2046,19 +2261,23 @@ function smoothPath(c, P, n){
 }
 const tapeWidth = st => st.w * 3;
 function drawTape(c, st){
-  const [color, pat] = String(st.c).split('~'), P = st.pts, n = P.length / 3;
-  c.save(); c.globalAlpha = 0.9; c.strokeStyle = patternFrom(c, tapeTile(color, pat || 'liso'));
-  c.lineWidth = tapeWidth(st); c.lineCap = 'butt'; c.lineJoin = 'round'; smoothPath(c, P, n); c.stroke();
-  // pontas serrilhadas
-  if (n >= 2) {
-    c.globalCompositeOperation = 'destination-out'; c.globalAlpha = 1; c.fillStyle = '#000';
-    const ends = [[0, 1], [n - 1, n - 2]];
-    for (const [i, j] of ends) {
-      const x = P[i*3], y = P[i*3+1], dx = P[i*3] - P[j*3], dy = P[i*3+1] - P[j*3+1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, nx = -uy, ny = ux, hw = tapeWidth(st) / 2, teeth = 6;
-      c.beginPath(); c.moveTo(x + nx * hw + ux * 2, y + ny * hw + uy * 2);
-      for (let k = 0; k <= teeth; k++) { const t = hw - (2 * hw) * k / teeth, depth = k % 2 ? -hw * 0.18 : 0; c.lineTo(x + nx * t + ux * depth, y + ny * t + uy * depth); }
-      c.lineTo(x - nx * hw + ux * 2, y - ny * hw + uy * 2); c.closePath(); c.fill();
-    }
+  const [color, pat] = String(st.c).split('~'), P = st.pts, n = P.length / 3, tw = tapeWidth(st);
+  c.save(); c.globalAlpha = 0.9;
+  const fillP = patternFrom(c, tapeTile(color, pat || 'liso'));
+  const x0 = P[0], y0 = P[1], x1 = P[(n-1)*3], y1 = P[(n-1)*3+1], L = Math.hypot(x1 - x0, y1 - y0);
+  let straight = n >= 2 && L > 1;
+  if (straight) for (let i = 3; i < P.length - 3; i += 9) if (segDist(P[i], P[i+1], x0, y0, x1, y1) > 1.5) { straight = false; break; }
+  if (straight) {
+    // fita reta: um retângulo com as pontas picotadas (desenhado como forma, sem apagar nada embaixo)
+    const ux = (x1 - x0) / L, uy = (y1 - y0) / L, nx = -uy, ny = ux, hw = tw / 2, teeth = 6, dep = hw * 0.18;
+    c.beginPath();
+    c.moveTo(x0 + nx * hw, y0 + ny * hw); c.lineTo(x1 + nx * hw, y1 + ny * hw);
+    for (let k = 1; k <= teeth; k++) { const t = hw - 2 * hw * k / teeth, d = k % 2 ? -dep : 0; c.lineTo(x1 + nx * t + ux * d, y1 + ny * t + uy * d); }
+    c.lineTo(x0 - nx * hw, y0 - ny * hw);
+    for (let k = 1; k <= teeth; k++) { const t = -hw + 2 * hw * k / teeth, d = k % 2 ? dep : 0; c.lineTo(x0 + nx * t + ux * d, y0 + ny * t + uy * d); }
+    c.closePath(); c.fillStyle = fillP; c.fill();
+  } else {
+    c.strokeStyle = fillP; c.lineWidth = tw; c.lineCap = 'butt'; c.lineJoin = 'round'; smoothPath(c, P, n); c.stroke();
   }
   c.restore();
 }
@@ -2204,7 +2423,7 @@ function hitItem(x, y, objectsOnly, noText){
   for (let i = S.items.length - 1; i >= 0; i--) {
     const it = S.items[i];
     if (isStroke(it)) { if (!objectsOnly && hits(it, x, y, 8)) return it; }
-    else { if (objectsOnly && (it.bg || (noText && it.t === 'x'))) continue; const b = bbox(it); if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) return it; }
+    else { if (it.bg || (objectsOnly && noText && it.t === 'x')) continue; const b = bbox(it); if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) return it; }
   }
   return null;
 }
@@ -2553,6 +2772,23 @@ function insertAndSelect(item){
   toast('Arraste para posicionar. Puxe a bolinha azul para aumentar ou diminuir.', 3500);
 }
 let stkTab = 'Estudo';
+function pickSticker(title){
+  return new Promise(resolve => {
+    let done = false;
+    openSheet(title, body => {
+      const draw = () => {
+        body.innerHTML = '';
+        const tabs = document.createElement('div'); tabs.className = 'tabs';
+        for (const k in STICKERS) { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = k; b.setAttribute('aria-pressed', k === stkTab); b.onclick = () => { stkTab = k; draw(); }; tabs.appendChild(b); }
+        const grid = document.createElement('div'); grid.className = 'stk-grid';
+        for (const e of STICKERS[stkTab]) { const b = document.createElement('button'); b.type = 'button'; b.className = 'stk'; b.textContent = e; b.setAttribute('aria-label', 'Figurinha ' + e); b.onclick = () => { done = true; closeSheet(); resolve(e); }; grid.appendChild(b); }
+        body.appendChild(tabs); body.appendChild(grid);
+      };
+      sheetOnClose = () => { if (!done) resolve(null); };
+      draw();
+    });
+  });
+}
 $('#stickerBtn').onclick = () => openSheet('Figurinhas', body => {
   const draw = () => {
     body.innerHTML = '';
@@ -2759,7 +2995,10 @@ const touches = new Map(); let gesture = null; let drawing = null; let vpRect = 
    - Se o tablet informa "caneta" (pointerType pen), só ela escreve; a mão nunca risca.
    - Se a caneta chega como "dedo", usamos o tamanho do toque medido no teste (caneta = ponta fina, palma = área grande).
    - Toques grandes (palma) são ignorados, e qualquer toque logo depois da caneta também. */
-const ignored = new Set(); let lastPenUp = -1e9;
+const ignored = new Map(); let lastPenUp = -1e9;   // id do toque -> quando começou
+// a palma pode sair da tela fora da folha: limpa o registro em qualquer lugar da janela
+for (const ev of ['pointerup', 'pointercancel']) window.addEventListener(ev, e => ignored.delete(e.pointerId), true);
+function cleanIgnored(){ const now = performance.now(); for (const [id, t] of ignored) if (now - t > 4000) ignored.delete(id); }
 function contactSize(e){ return Math.max(e.width || 0, e.height || 0); }
 let lastPenHover = -1e9;
 function classify(e){
@@ -2769,7 +3008,7 @@ function classify(e){
   if (size >= palm) return 'palm';                                              // área grande = palma
   if ((drawing && drawing.ptype === 'pen') || now - lastPenUp < 650) return 'palm'; // logo depois de escrever
   if (now - lastPenHover < 500) return 'palm';                                  // a caneta está pairando perto da tela
-  if (ignored.size) return 'palm';                                              // já tem uma palma apoiada
+  cleanIgnored(); if (ignored.size) return 'palm';                              // já tem uma palma apoiada
   if (touches.size >= 2) return 'finger';
   if (S.penVirtual && size > 0 && size <= Math.max(S.penSize * 1.6, S.penSize + 3)) return 'pen';
   return 'finger';
@@ -2904,6 +3143,7 @@ function endInput(cancel){
       if (!d.moved || d.poly.length < 12) { toolTap(d.sx, d.sy); return; }
       const poly = d.poly;
       setSel(S.items.filter(it => {
+        if (it.bg) return false;                       // página de PDF importada fica fixa
         if (isStroke(it)) { const P = it.pts; let inn = 0, tot = 0; for (let i = 0; i < P.length; i += 6) { tot++; if (pointInPoly(P[i], P[i+1], poly)) inn++; } return tot && inn / tot > 0.5; }
         const b = bbox(it); return pointInPoly((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, poly);
       }));
@@ -2931,6 +3171,8 @@ function endInput(cancel){
     if (!d.moved && d.st.pts.length <= 15) { const obj = hitItem(d.sx, d.sy, true, true); if (obj) { setSel([obj]); return; } }
     const P = d.st.pts, n = P.length / 3;
     if (!d.shaped && d.k && Math.hypot(d.rx - P[(n-1)*3], d.ry - P[(n-1)*3+1]) > 0.7) P.push(d.rx, d.ry, P[(n-1)*3+2]);
+    // suavização: ao levantar a caneta, o traço é alisado conforme o ajuste "Suavização" da caneta
+    if (!d.shaped && !d.autoShape && PEN_TYPES[d.st.t] && S.penCfg[d.st.t]) d.st.pts = smoothPts(d.st.pts, S.penCfg[d.st.t].suav / 100);
     if (d.autoShape && !d.shaped) { const res = recognize(d.st.pts); if (res) d.st.pts = res; else toast('Não reconheci a forma. Ficou como desenho livre; desfaça para tentar de novo.', 2500); }
     if (d.st.t === 'h' && !d.shaped) smartBand(d.st, S.hlStraight, S.hlFit, s => s.w * 2.4);
     if (d.st.t === 't') smartBand(d.st, S.tape.straight, S.tape.fit, tapeWidth);
@@ -2986,7 +3228,7 @@ vp.addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
   vpRect = vp.getBoundingClientRect();
   const cls = classify(e);
-  if (cls === 'palm') { ignored.add(e.pointerId); inputBadge('✋ Mão ignorada'); return; }   // palma da mão: não risca nem arrasta
+  if (cls === 'palm') { ignored.set(e.pointerId, performance.now()); inputBadge('✋ Mão ignorada'); return; }   // palma da mão: não risca nem arrasta
   try { vp.setPointerCapture(e.pointerId); } catch(_){}
   if (cls === 'pen' && e.pointerType === 'touch') { if (drawing) return; startInput(asPen(e)); return; }   // caneta reconhecida pelo tamanho
   if (e.pointerType === 'touch') {
@@ -3059,6 +3301,7 @@ $('#menuBtn').onclick = () => {
   if (downloads) { items.push({ text: 'Exportar esta página (imagem PNG)', run: exportPng }); items.push({ text: 'Exportar caderno inteiro (PDF)', run: () => exportPdf(S.nb) }); }
   items.push('-');
   items.push({ text: 'Capa e nome do caderno', run: () => editNotebook(S.nb) });
+  items.push({ text: 'Aparência do app', run: openAppearance });
   if (!S.nb.shared && mode === 'db') items.push({ text: 'Compartilhar para colaborar', run: () => shareNotebook(S.nb) });
   items.push({ text: 'Limpar esta página', danger: true, run: () => { if (!S.items.length) return; pushUndo(S.items); S.items = []; clearSel(); renderInk(); markDirty(); toast('Página limpa. Toque em desfazer se foi sem querer.'); } });
   items.push({ text: 'Excluir esta página', danger: true, run: () => deletePageAt(S.pageIdx) });
