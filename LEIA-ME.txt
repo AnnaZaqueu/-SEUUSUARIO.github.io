@@ -1,4 +1,4 @@
-ATUALIZAR O APP NO GITHUB (pelo tablet) - versão v7
+ATUALIZAR O APP NO GITHUB (pelo tablet) - versão v8
 
 1. Extraia este zip no tablet (app Arquivos > segure o zip > Extrair).
 2. Abra github.com/AnnaZaqueu/AnnaZaqueu.github.io no Chrome.

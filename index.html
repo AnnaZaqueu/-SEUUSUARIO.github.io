@@ -43,7 +43,7 @@ button{font:inherit;color:inherit}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hidden{display:none!important}
 /* tamanho da interface escolhido em Aparência (a folha não muda, só botões e textos) */
-.topbar,.tools,.pager,#home,.sheet,.dlg{zoom:var(--uiz,1)}
+.topbar,.tools,.ribbon-tabs,.pager,#home,.sheet,.dlg{zoom:var(--uiz,1)}
 
 /* ---------- Estante ---------- */
 #home{height:100%;overflow-y:auto;padding:20px max(16px,4vw) 40px}
@@ -116,6 +116,42 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .sw{width:28px;height:28px;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer;padding:0;flex:none;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 .sw[aria-pressed="true"]{border-color:var(--surface);box-shadow:0 0 0 2px var(--accent)}
+.menu .swatches{flex-wrap:wrap;max-width:300px;gap:8px}
+.menu .sw{display:block;width:34px;height:34px;border-radius:50%;padding:0;background:var(--c);border:2px solid rgba(0,0,0,.08)}
+.menu .sw:active{background:var(--c);transform:scale(.92)}
+/* Abas estilo Word */
+.ribbon-tabs{display:flex;gap:2px;padding:4px 10px 0;background:var(--surface);overflow-x:auto;scrollbar-width:none}
+.ribbon-tabs::-webkit-scrollbar{display:none}
+.ribbon-tabs button{border:0;background:none;padding:9px 18px 8px;font:inherit;font-weight:600;font-size:15px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;white-space:nowrap}
+.ribbon-tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-soft)}
+#ribExtra{display:flex;align-items:center;gap:8px;flex:none}
+#ribExtra .chipbtn .lbl{display:inline}
+.tools .hidden-tab{display:none!important}
+/* Trilho das páginas (direita) */
+.work{flex:1;display:flex;min-height:0}
+#viewport{min-width:0}
+#pageRail{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:0 4px 14px rgba(20,30,60,.12);zoom:var(--uiz,1)}
+#pageRail .icon-btn{width:42px;height:42px}
+#pageRail .icon-btn:disabled{opacity:.3}
+#pageRail .rl{font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;text-align:center;line-height:1.15;padding:2px 0}
+#pageRail .rl small{display:block;font-weight:600;color:var(--muted);font-size:11px}
+#pageRail .add{background:var(--accent);color:var(--on-accent,#fff);border-radius:12px}
+#pageRail .del{color:var(--danger)}
+#pageRail hr{width:70%;border:0;border-top:1px solid var(--line);margin:2px 0}
+/* Painel de páginas (esquerda) */
+#pgSide{width:150px;flex:none;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;zoom:var(--uiz,1)}
+#pgSide.closed{display:none}
+#pgSide .ps-head{display:flex;align-items:center;justify-content:space-between;padding:8px 6px 6px 12px;font-weight:700;font-size:14px}
+#pgSide .ps-list{flex:1;overflow-y:auto;padding:4px 12px 12px;display:flex;flex-direction:column;gap:12px}
+.ps-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ps-item canvas{width:100%;aspect-ratio:1000/1414;background:#fff;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer}
+.ps-item.cur canvas{outline:3px solid var(--accent);outline-offset:2px}
+.ps-item .ps-n{font-size:12.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.ps-item.cur .ps-n{color:var(--accent)}
+.ps-item .ps-more{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:8px;border:0;background:rgba(255,255,255,.92);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer;display:grid;place-items:center}
+.ps-item .ps-more svg{width:16px;height:16px}
+#pgSide .ps-add{margin:0 12px 12px;justify-content:center}
 .custom{position:relative;width:28px;height:28px;border-radius:50%;overflow:hidden;flex:none;
   background:conic-gradient(#f44,#fd3,#4c4,#3cf,#44f,#c4f,#f44);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 .custom input{position:absolute;inset:-6px;opacity:0;cursor:pointer;width:40px;height:40px}
@@ -342,6 +378,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </button>
   </div>
 
+  <div class="ribbon-tabs" id="ribTabs" role="tablist" aria-label="Abas de ferramentas">
+    <button type="button" role="tab" data-tab="escrever" aria-selected="true">Escrever</button>
+    <button type="button" role="tab" data-tab="inserir" aria-selected="false">Inserir</button>
+    <button type="button" role="tab" data-tab="pagina" aria-selected="false">Página</button>
+    <button type="button" role="tab" data-tab="exibir" aria-selected="false">Exibir</button>
+  </div>
   <div class="tools" id="tools">
     <div class="seg" role="group" aria-label="Ferramenta">
       <button class="tool" data-tool="pen" type="button" aria-label="Caneta (toque de novo para ajustes)" aria-pressed="true">
@@ -372,25 +414,32 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </div>
     <div class="sep"></div>
     <div class="ctx" id="ctx"></div>
+    <div id="ribExtra"></div>
     <div class="spacer"></div>
-    <button class="chipbtn" id="padBtn" type="button" aria-pressed="false" title="Campo de escrita fácil: escreva grande, fica pequeno na folha">
+    <button class="chipbtn" data-tab="inserir" id="padBtn" type="button" aria-pressed="false" title="Campo de escrita fácil: escreva grande, fica pequeno na folha">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="18" height="8" rx="2"/><path d="M7 17c1.5-2 2.5 2 4 0s2.5 2 4 0"/><rect x="8" y="3" width="8" height="5" rx="1" stroke-dasharray="2 1.6"/><path d="M12 8v4"/></svg>
       <span class="lbl">Escrita fácil</span>
     </button>
-    <button class="chipbtn" id="stickerBtn" type="button" title="Figurinhas">
+    <button class="chipbtn" data-tab="inserir" id="stickerBtn" type="button" title="Figurinhas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 11-8-8h3l5 5z"/><path d="M15 4v5h5"/><path d="M9 14.5c1.5 1.5 4.5 1.5 6 0"/><path d="M9 10h.01M13 10h.01"/></svg>
       <span class="lbl">Figurinha</span>
     </button>
-    <button class="chipbtn" id="imgBtn" type="button" title="Inserir imagem">
+    <button class="chipbtn" data-tab="inserir" id="imgBtn" type="button" title="Inserir imagem">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
       <span class="lbl">Imagem</span>
     </button>
-    <button class="chipbtn" id="penOnly" type="button" aria-pressed="true" title="Caneta e mão: quem escreve e teste da palma da mão">
+    <button class="chipbtn" data-tab="exibir" id="penOnly" type="button" aria-pressed="true" title="Caneta e mão: quem escreve e teste da palma da mão">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1.2-4.6L16.5 4.1a2 2 0 012.8 0l.6.6a2 2 0 010 2.8L8.6 18.8z"/></svg>
       <span class="lbl">Só caneta</span>
     </button>
   </div>
 
+  <div class="work">
+  <aside id="pgSide" aria-label="Páginas do caderno">
+    <div class="ps-head"><span>Páginas</span><button class="icon-btn" id="psClose" type="button" aria-label="Fechar painel de páginas" title="Fechar painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button></div>
+    <div class="ps-list" id="psList"></div>
+    <button class="btn ps-add" id="psAdd" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Página</button>
+  </aside>
   <div id="viewport">
     <div id="paper"></div>
     <canvas id="bg"></canvas>
@@ -399,6 +448,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <div id="padBox" class="hidden"></div>
     <div id="selBox" class="hidden"><div id="selHandle" title="Arraste para aumentar ou diminuir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M7 7l10 10M17 10v7h-7"/></svg></div><div id="selHandleR" class="sideHandle" title="Arraste para alargar ou estreitar"></div><div id="selHandleB" class="sideHandle" title="Arraste para esticar ou achatar"></div></div>
     <div id="selBar" class="hidden"></div>
+    <div id="pageRail" aria-label="Páginas">
+      <button class="icon-btn" id="pagesBtn" type="button" aria-label="Mostrar ou esconder o painel de páginas" title="Painel de páginas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></svg></button>
+      <hr>
+      <button class="icon-btn" id="prevPg" type="button" aria-label="Página anterior" title="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg></button>
+      <div class="rl" id="pgLabel" aria-live="polite">1<small>de 1</small></div>
+      <button class="icon-btn" id="nextPg" type="button" aria-label="Próxima página" title="Próxima página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button>
+      <hr>
+      <button class="icon-btn add" id="addPg" type="button" aria-label="Adicionar página depois desta" title="Adicionar página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="icon-btn del" id="delPg" type="button" aria-label="Excluir esta página" title="Excluir esta página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg></button>
+    </div>
     <button class="zoom-chip" id="zoomChip" type="button" title="Voltar ao tamanho da tela">100%</button>
     <div id="pad" class="hidden">
       <canvas id="padC" aria-label="Campo de escrita fácil"></canvas>
@@ -423,21 +482,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </div>
   </div>
 
-  <div class="pager">
-    <button class="icon-btn" id="pagesBtn" type="button" aria-label="Ver todas as páginas">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="4" width="7" height="9" rx="1.5"/><rect x="13" y="4" width="7" height="9" rx="1.5"/><rect x="4" y="15" width="7" height="5" rx="1.5"/><rect x="13" y="15" width="7" height="5" rx="1.5"/></svg>
-    </button>
-    <button class="icon-btn" id="prevPg" type="button" aria-label="Página anterior">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-    </button>
-    <div class="label" id="pgLabel">Página 1 de 1</div>
-    <button class="icon-btn" id="nextPg" type="button" aria-label="Próxima página">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
-    </button>
-    <button class="btn" id="addPg" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      Página
-    </button>
   </div>
 </section>
 
@@ -1515,6 +1559,7 @@ function markDirty(){
   dirty = true; setStatus('pending');
   if (S.nb) { S.nb.updated = Date.now(); if (S.nb.shared) touchShared(S.nb); else indexDirty = true; }
   clearTimeout(pageTimer); pageTimer = setTimeout(flushPage, 1200);
+  scheduleThumb();
 }
 function retryLater(){ clearTimeout(retryTimer); retryTimer = setTimeout(() => { flushPage(); saveIndex(); }, 6000); }
 function flushPage(){
@@ -2051,6 +2096,7 @@ async function openNotebook(id){
   setStatus(mode === 'db' ? 'ok' : 'local');
   buildCtx(); syncToolUI();
   if (!nb.pages || !nb.pages.length) { nb.pages = nb.pages || []; nb.pages.push({ id: newId(), tpl: nb.tpl, to: nb.to, chunks: 0 }); touchNb(nb); }   // caderno vazio (ex.: PDF cancelado)
+  SIDE.key = ''; applyTab();
   sizeCanvases(); fitView();
   await showPage(0);
   if (!LS.get('caderno.penAsk')) {
@@ -2163,7 +2209,10 @@ async function showPage(i){
 }
 function updatePager(){
   if (!S.nb) return;
-  $('#pgLabel').textContent = 'Página ' + (S.pageIdx + 1) + ' de ' + S.nb.pages.length;
+  $('#pgLabel').innerHTML = (S.pageIdx + 1) + '<small>de ' + S.nb.pages.length + '</small>';
+  $('#pgLabel').setAttribute('aria-label', 'Página ' + (S.pageIdx + 1) + ' de ' + S.nb.pages.length);
+  $('#delPg').disabled = S.readonly;
+  refreshSide();
   $('#prevPg').disabled = S.pageIdx === 0;
   $('#nextPg').disabled = S.pageIdx >= S.nb.pages.length - 1;
 }
@@ -2179,6 +2228,7 @@ async function addPage(tpl, to){
   await showPage(S.pageIdx + 1); fitView(true);
 }
 $('#addPg').onclick = () => addPage();
+$('#delPg').onclick = () => deletePageAt(S.pageIdx);
 
 /* ---------- Colaboração ao vivo ---------- */
 let sharedUnsub = null, pendingSnap = null;
@@ -2347,7 +2397,110 @@ function syncToolUI(){
 function setTool(t){
   if (S.tool === 'text' && t !== 'text') commitText();
   if (t !== 'select') clearSel();
-  S.tool = t; buildCtx(); syncToolUI();
+  S.tool = t; if (TAB_TOOLS.escrever.includes(t)) S.lastWrite = t;
+  const tb = tabOfTool(t); if (tb && RIB.tab !== tb) RIB.tab = tb;
+  buildCtx(); syncToolUI(); applyTab();
+}
+/* ---------- Abas (como no Word): cada aba mostra só as suas ferramentas ---------- */
+const TAB_TOOLS = { escrever: ['pen', 'hl', 'tape', 'eraser', 'select', 'laser'], inserir: ['text', 'shape'] };
+const tabOfTool = t => TAB_TOOLS.escrever.includes(t) ? 'escrever' : TAB_TOOLS.inserir.includes(t) ? 'inserir' : null;
+const RIB = { tab: 'escrever' };
+function ribBtn(svg, label, fn, title, danger){ const b = chipBtn(svg ? ico(svg) : '', label, undefined, fn, title || label, true); if (danger) b.style.color = 'var(--danger)'; return b; }
+function applyTab(){
+  const tab = RIB.tab, tools = TAB_TOOLS[tab] || [];
+  document.querySelectorAll('#ribTabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
+  document.querySelectorAll('#tools .seg .tool').forEach(b => b.classList.toggle('hidden-tab', !tools.includes(b.dataset.tool)));
+  const seg = document.querySelector('#tools .seg'); seg.classList.toggle('hidden-tab', !tools.length);
+  const showCtx = tools.includes(S.tool);
+  $('#ctx').classList.toggle('hidden-tab', !showCtx); document.querySelector('#tools > .sep').classList.toggle('hidden-tab', !showCtx || !tools.length);
+  document.querySelectorAll('#tools > .chipbtn[data-tab]').forEach(b => b.classList.toggle('hidden-tab', b.dataset.tab !== tab));
+  const ex = $('#ribExtra'); ex.innerHTML = '';
+  if (tab === 'inserir') {
+    if (showCtx) ex.appendChild(sepEl());
+    ex.appendChild(ribBtn('<path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M12 11v6M9 14l3 3 3-3"/>', 'PDF aqui', () => { pdfTarget = S.nb; $('#pdfInput').value = ''; $('#pdfInput').click(); }, 'Importar PDF como novas páginas'));
+  } else if (tab === 'pagina' && S.nb) {
+    for (const it of pageMenuItems()) {
+      if (it === '-' || it.label) { ex.appendChild(sepEl()); continue; }
+      ex.appendChild(ribBtn('', it.text.replace(/…$/, ''), () => { commitText(); it.run(); }, it.text, it.danger));
+    }
+  } else if (tab === 'exibir') {
+    ex.appendChild(ribBtn('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', fsEl() ? 'Sair da tela cheia' : 'Tela cheia', () => { if (fsEl()) exitFs(); else enterFs(); setTimeout(applyTab, 300); }));
+    ex.appendChild(ribBtn('<rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="16" rx="1.5"/>', SIDE.open ? 'Esconder páginas' : 'Mostrar páginas', () => { toggleSide(); applyTab(); }));
+    ex.appendChild(ribBtn('<circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/><path d="M8 11h6"/>', 'Folha inteira', () => fitView()));
+    ex.appendChild(ribBtn('<circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/><path d="M8 11h6M11 8v6"/>', 'Aproximar', () => zoomBy(1.25)));
+    ex.appendChild(ribBtn('<circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/><path d="M8 11h6"/>', 'Afastar', () => zoomBy(0.8)));
+    ex.appendChild(sepEl());
+    ex.appendChild(ribBtn('<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18z" fill="currentColor"/>', 'Aparência', openAppearance));
+  }
+}
+function zoomBy(f){
+  const vw = vp.clientWidth, vh = vp.clientHeight, z = clamp(S.z * f, 1, 6), k0 = S.cs * S.z, k = S.cs * z;
+  const px = (vw / 2 - S.tx) / k0, py = (vh / 2 - S.ty) / k0; S.z = z; S.tx = vw / 2 - px * k; S.ty = vh / 2 - py * k;
+  clampView(); applyView(); renderAll();
+}
+document.querySelectorAll('#ribTabs [data-tab]').forEach(b => b.onclick = () => {
+  RIB.tab = b.dataset.tab;
+  if (RIB.tab === 'escrever' && !TAB_TOOLS.escrever.includes(S.tool)) { setTool(S.lastWrite || 'pen'); return; }
+  applyTab();
+});
+
+/* ---------- Painel de páginas à esquerda ---------- */
+const SIDE = { open: LS.get('caderno.side') !== '0', key: '' };
+function toggleSide(force){
+  SIDE.open = force == null ? !SIDE.open : force; LS.set('caderno.side', SIDE.open ? '1' : '0');
+  $('#pgSide').classList.toggle('closed', !SIDE.open); $('#pagesBtn').setAttribute('aria-pressed', SIDE.open);
+  SIDE.key = ''; refreshSide();
+  requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+}
+$('#pagesBtn').onclick = () => toggleSide();
+$('#pgSide').classList.toggle('closed', !SIDE.open); $('#pagesBtn').setAttribute('aria-pressed', SIDE.open);
+$('#psClose').onclick = () => toggleSide(false);
+$('#psAdd').onclick = () => addPage();
+let sideObs = null;
+async function drawThumb(cv, page, i){
+  const items = i === S.pageIdx ? S.items : await loadPageItems(page);
+  await preloadImages(items);
+  const x = cv.getContext('2d'); x.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+  const { tpl, to } = pageTpl(page); drawTemplate(x, tpl, to, 2.4); for (const it of items) drawItem(x, it);
+}
+function refreshSide(){
+  if (!S.nb || !SIDE.open) return;
+  const list = $('#psList'), key = S.nb.id + '|' + S.nb.pages.map(p => p.id).join(',');
+  if (key !== SIDE.key) {
+    SIDE.key = key; list.innerHTML = '';
+    if (sideObs) sideObs.disconnect();
+    sideObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !e.target._drawn) { e.target._drawn = true; const i = +e.target.dataset.i; drawThumb(e.target, S.nb.pages[i], i).catch(() => {}); } }), { root: list, rootMargin: '300px' }) : null;
+    S.nb.pages.forEach((page, i) => {
+      const it = document.createElement('div'); it.className = 'ps-item';
+      const cv = document.createElement('canvas'); cv.width = 180; cv.height = 254; cv.dataset.i = i; cv.setAttribute('aria-label', 'Ir para a página ' + (i + 1));
+      cv.onclick = () => { if (i !== S.pageIdx) showPage(i); };
+      const n = document.createElement('div'); n.className = 'ps-n'; n.textContent = i + 1;
+      const more = document.createElement('button'); more.type = 'button'; more.className = 'ps-more'; more.innerHTML = ico('<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>'); more.setAttribute('aria-label', 'Opções da página ' + (i + 1));
+      more.onclick = () => showMenu(more, [
+        { text: 'Mover para cima', run: () => moveSidePage(i, -1) },
+        { text: 'Mover para baixo', run: () => moveSidePage(i, 1) },
+        { text: 'Duplicar', run: () => duplicatePage(i) },
+        { text: 'Copiar página', run: async () => { await copyPage(i); toast('Página copiada. Use ⋮ → Colar página.'); } },
+        '-',
+        { text: 'Excluir página', danger: true, run: () => deletePageAt(i) }
+      ]);
+      it.appendChild(cv); it.appendChild(n); it.appendChild(more); list.appendChild(it);
+      if (sideObs) sideObs.observe(cv); else { cv._drawn = true; drawThumb(cv, page, i).catch(() => {}); }
+    });
+  }
+  [...list.children].forEach((el, i) => el.classList.toggle('cur', i === S.pageIdx));
+  const cur = list.children[S.pageIdx];
+  if (cur) { const r = cur.getBoundingClientRect(), lr = list.getBoundingClientRect(); if (r.top < lr.top || r.bottom > lr.bottom) cur.scrollIntoView({ block: 'nearest' }); }
+}
+function moveSidePage(i, dir){
+  const j = i + dir; if (j < 0 || j >= S.nb.pages.length) return;
+  const curId = curPage().id; const arr = S.nb.pages; [arr[i], arr[j]] = [arr[j], arr[i]];
+  S.pageIdx = arr.findIndex(p => p.id === curId); touchNb(S.nb); updatePager();
+}
+let thumbTimer = 0;
+function scheduleThumb(){
+  clearTimeout(thumbTimer);
+  thumbTimer = setTimeout(() => { if (!S.nb || !SIDE.open) return; const cv = $('#psList').children[S.pageIdx]; if (cv) drawThumb(cv.querySelector('canvas'), curPage(), S.pageIdx).catch(() => {}); }, 900);
 }
 document.querySelectorAll('.tool').forEach(b => b.onclick = () => {
   const t = b.dataset.tool;
@@ -2534,9 +2687,11 @@ function sizeCanvases(){
   const w = vp.clientWidth, h = vp.clientHeight;
   for (const c of [bgC, inkC, liveC]) { c.width = Math.max(1, Math.round(w * DPR)); c.height = Math.max(1, Math.round(h * DPR)); c.style.width = w + 'px'; c.style.height = h + 'px'; }
 }
+const RAIL_W = 64;
+const pageFitW = vw => Math.min(vw - 28 - RAIL_W * 2, 940);
 function fitView(keepZoom){
   const vw = vp.clientWidth;
-  S.cs = Math.min(vw - 28, 940) / W;
+  S.cs = Math.max(200, pageFitW(vw)) / W;
   if (!keepZoom) S.z = 1;
   S.tx = (vw - W * S.cs * S.z) / 2; S.ty = 14;
   clampView(); applyView(); renderAll();
@@ -2565,7 +2720,7 @@ function renderAll(){
 let renderTimer = null;
 function scheduleRender(ms){ clearTimeout(renderTimer); renderTimer = setTimeout(() => { if (!drawing) renderAll(); }, ms == null ? 90 : ms); }
 $('#zoomChip').onclick = () => fitView();
-window.addEventListener('resize', () => { if (S.nb) { sizeCanvases(); S.cs = Math.min(vp.clientWidth - 28, 940) / W; clampView(); applyView(); renderAll(); if (S.pad) layoutPad(); } });
+window.addEventListener('resize', () => { if (S.nb) { sizeCanvases(); S.cs = Math.max(200, pageFitW(vp.clientWidth)) / W; clampView(); applyView(); renderAll(); if (S.pad) layoutPad(); } });
 const pageToScreen = (x, y) => { const k = S.cs * S.z; return [S.tx + x * k, S.ty + y * k]; };
 function visibleRect(){ const k = RV.k; return [-RV.tx / k, -RV.ty / k, (vp.clientWidth - RV.tx) / k, (vp.clientHeight - RV.ty) / k]; }
 
@@ -3754,7 +3909,7 @@ function updateGesture(){
 }
 vp.addEventListener('pointerdown', e => {
   if (!S.nb) return;
-  if (e.target.closest && e.target.closest('#selBar, #textEd, #zoomChip, #pad')) return;
+  if (e.target.closest && e.target.closest('#selBar, #textEd, #zoomChip, #pad, #pageRail')) return;
   if (e.pointerType === 'mouse' && e.button !== 0) return;
   vpRect = vp.getBoundingClientRect();
   const cls = classify(e);
@@ -3814,8 +3969,7 @@ vp.addEventListener('wheel', e => {
 vp.addEventListener('contextmenu', e => e.preventDefault());
 
 /* ---------- Menu da página ---------- */
-$('#menuBtn').onclick = () => {
-  commitText();
+function pageMenuItems(){
   const page = curPage();
   const items = [
     { text: 'Modelo desta página…', run: async () => { const r = await pickTemplate(page.tpl || S.nb.tpl, page.to || S.nb.to, 'Modelo desta página'); if (r) { page.tpl = r.tpl; page.to = r.to; touchNb(S.nb); renderBg(); if (S.pad) renderPad(); } } },
@@ -3836,8 +3990,9 @@ $('#menuBtn').onclick = () => {
   if (!S.nb.shared && mode === 'db') items.push({ text: 'Compartilhar para colaborar', run: () => shareNotebook(S.nb) });
   items.push({ text: 'Limpar esta página', danger: true, run: () => { if (!S.items.length) return; pushUndo(S.items); S.items = []; clearSel(); renderInk(); markDirty(); toast('Página limpa. Toque em desfazer se foi sem querer.'); } });
   items.push({ text: 'Excluir esta página', danger: true, run: () => deletePageAt(S.pageIdx) });
-  showMenu($('#menuBtn'), items);
-};
+  return items;
+}
+$('#menuBtn').onclick = () => { commitText(); showMenu($('#menuBtn'), pageMenuItems()); };
 async function deletePageAt(i){
   const ok = await confirmDialog('Excluir a página ' + (i + 1) + '?', 'O que está nela será apagado.', 'Excluir', true);
   if (!ok) return false;
@@ -3854,7 +4009,7 @@ async function deletePageAt(i){
 }
 
 /* ---------- Todas as páginas ---------- */
-$('#pagesBtn').onclick = async () => {
+const openPagesSheet = async () => {
   commitText(); await flushPage();
   openSheet('Páginas de "' + S.nb.name + '"', body => {
     const draw = () => {

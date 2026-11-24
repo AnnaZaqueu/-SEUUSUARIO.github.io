@@ -4,7 +4,7 @@
   para ele abrir e funcionar mesmo sem internet.
   Ao publicar uma versão nova do index.html, aumente o número em VERSAO.
 */
-const VERSAO = 'caderno-v7';
+const VERSAO = 'caderno-v8';
 
 const ARQUIVOS_DO_APP = [
   './',
