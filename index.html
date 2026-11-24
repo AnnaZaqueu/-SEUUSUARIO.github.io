@@ -7,7 +7,7 @@
 <title>Caderno Digital</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Caveat:wght@400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Caveat:wght@400;700&family=Lora:wght@400;700&family=Playwrite+BR:wght@300;400&family=Andika:wght@400;700&family=Dancing+Script:wght@400;700&family=Patrick+Hand&family=Merriweather:wght@400;700&family=Quicksand:wght@400;700&family=Pacifico&family=Special+Elite&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
@@ -142,7 +142,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 #selHandle{position:absolute;right:-15px;bottom:-15px;width:30px;height:30px;border-radius:50%;background:var(--accent);
   border:3px solid #fff;pointer-events:auto;box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:nwse-resize;touch-action:none;display:grid;place-items:center}
 #selHandle svg{width:14px;height:14px;color:#fff;pointer-events:none}
-#selBar{position:absolute;display:flex;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;
+.sideHandle{position:absolute;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--accent);pointer-events:auto;box-shadow:0 1px 4px rgba(0,0,0,.25);touch-action:none;display:none}
+#selHandleR{right:-14px;top:calc(50% - 13px);cursor:ew-resize}
+#selHandleB{bottom:-14px;left:calc(50% - 13px);cursor:ns-resize}
+#selBox.stretch .sideHandle{display:block}
+#selBar{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 12px);gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;
   box-shadow:0 8px 22px rgba(0,0,0,.18);z-index:5}
 #selBar button{border:0;background:none;border-radius:8px;padding:8px 10px;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px}
 #selBar button:active{background:var(--accent-soft)}
@@ -192,6 +196,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .menu button{display:flex;width:100%;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer}
 .menu button:active{background:var(--accent-soft)}
 .menu button.danger{color:var(--danger)}
+.menu .chip{width:auto;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 14px;font-weight:500}
+.menu .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .menu .mlabel{font-size:12px;color:var(--muted);padding:8px 12px 4px;font-weight:600}
 .menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
 .menu button[aria-checked="true"]::after{content:"✓";margin-left:auto;color:var(--accent);font-weight:700}
@@ -298,6 +304,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </button>
     <div class="title" id="nbTitle"></div>
     <div class="status" id="status"><i></i><span>Salvo</span></div>
+    <button class="icon-btn" id="fsBtn" type="button" aria-label="Tela cheia" title="Tela cheia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button class="icon-btn" id="undo" type="button" aria-label="Desfazer">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>
     </button>
@@ -364,7 +371,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <canvas id="ink"></canvas>
     <canvas id="live"></canvas>
     <div id="padBox" class="hidden"></div>
-    <div id="selBox" class="hidden"><div id="selHandle" title="Arraste para aumentar ou diminuir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M7 7l10 10M17 10v7h-7"/></svg></div></div>
+    <div id="selBox" class="hidden"><div id="selHandle" title="Arraste para aumentar ou diminuir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M7 7l10 10M17 10v7h-7"/></svg></div><div id="selHandleR" class="sideHandle" title="Arraste para alargar ou estreitar"></div><div id="selHandleB" class="sideHandle" title="Arraste para esticar ou achatar"></div></div>
     <div id="selBar" class="hidden"></div>
     <button class="zoom-chip" id="zoomChip" type="button" title="Voltar ao tamanho da tela">100%</button>
     <div id="pad" class="hidden">
@@ -439,8 +446,18 @@ const DEF_K = { f: .7, p: .2, l: .45, b: .9, c: .5, m: 0, h: 0, t: 0 };
 const FONTS = {
   s: { name: 'Moderna',    css: '"Figtree", system-ui, sans-serif' },
   h: { name: 'Manuscrita', css: '"Caveat", cursive' },
-  r: { name: 'Clássica',   css: '"Lora", Georgia, serif' }
+  r: { name: 'Clássica',   css: '"Lora", Georgia, serif' },
+  c: { name: 'Cursiva escolar', css: '"Playwrite BR", cursive' },
+  b: { name: 'Bastão',     css: '"Andika", "Figtree", sans-serif' },
+  d: { name: 'Elegante',   css: '"Dancing Script", cursive' },
+  p: { name: 'Letra de mão', css: '"Patrick Hand", "Caveat", cursive' },
+  l: { name: 'Livro',      css: '"Merriweather", Georgia, serif' },
+  q: { name: 'Arredondada', css: '"Quicksand", "Figtree", sans-serif' },
+  t: { name: 'Divertida',  css: '"Pacifico", cursive' },
+  m: { name: 'Máquina de escrever', css: '"Special Elite", "Courier New", monospace' }
 };
+/* As fontes de caligrafia só baixam quando pedidas: carregamos logo, e redesenhamos quando chegarem */
+const fontsReady = (document.fonts && document.fonts.load) ? Promise.all(['300 40px "Playwrite BR"', '400 40px "Playwrite BR"', '400 40px "Andika"', '700 40px "Andika"', '400 40px "Dancing Script"', '700 40px "Dancing Script"', '400 40px "Patrick Hand"', '400 40px "Merriweather"', '700 40px "Merriweather"', '400 40px "Quicksand"', '700 40px "Quicksand"', '400 40px "Pacifico"', '400 40px "Special Elite"'].map(f => document.fonts.load(f).catch(() => {}))) : Promise.resolve();
 const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
 const STICKERS = {
   'Estudo': ['⭐','✅','❗','❓','📌','📎','💡','📚','📝','✏️','📅','⏰','🎯','🏆','🔖','📊','🧠','⚠️','🔑','💯'],
@@ -587,6 +604,7 @@ function openDialog(build, wide){
     const box = document.createElement('div'); box.className = 'dlg' + (wide ? ' wide' : ''); box.setAttribute('role','dialog');
     scrim.appendChild(box); document.body.appendChild(scrim);
     const close = v => { scrim.remove(); resolve(v); };
+    scrim._close = close;
     scrim.addEventListener('pointerdown', e => { if (e.target === scrim) close(null); });
     build(box, close);
   });
@@ -963,6 +981,12 @@ const TEMPLATES = {
   'pontos':            { name: 'Pontilhado', cat: 'Básicos', draw(c){ tDots(c, 36); } },
   'pontos-estreitos':  { name: 'Pontos estreitos', cat: 'Básicos', draw(c){ tDots(c, 24); } },
   'pontos-espacados':  { name: 'Pontos espaçados', cat: 'Básicos', draw(c){ tDots(c, 54); } },
+  // ---------- Caligrafia ----------
+  'cal-cursiva':  { name: 'Caligrafia cursiva', cat: 'Caligrafia', snapFn: () => [CAL.cur.top + CAL.cur.a + CAL.cur.x, CAL.cur.period], help: 'Pauta de 4 linhas: o corpo da letra (a, e, o, m) fica entre a linha azul tracejada e a linha de base. As hastes (b, d, l, t) sobem até a linha de cima e as pernas (g, j, p) descem até a de baixo.', draw(c){ calGuides(c, CAL.cur, false); } },
+  'cal-inclinada':{ name: 'Cursiva com inclinação', cat: 'Caligrafia', snapFn: () => [CAL.cur.top + CAL.cur.a + CAL.cur.x, CAL.cur.period], help: 'Igual à cursiva, com linhas inclinadas de fundo para manter todas as letras com a mesma inclinação.', draw(c){ calGuides(c, CAL.cur, true); } },
+  'cal-bastao':   { name: 'Caligrafia bastão', cat: 'Caligrafia', snapFn: () => [CAL.bas.top + CAL.bas.a + CAL.bas.x, CAL.bas.period], help: 'Pauta para letra de forma (bastão): maiúsculas ocupam a faixa toda; minúsculas, da linha tracejada até a base. Os tracinhos verticais ajudam a manter o espaço entre as letras.', draw(c){ calGuides(c, CAL.bas, false, true); } },
+  'cal-treino-cursiva': { name: 'Treino de cursiva (para cobrir)', cat: 'Caligrafia', snapFn: () => [CAL.cur.top + CAL.cur.a + CAL.cur.x, CAL.cur.period], help: 'Cubra o modelo cinza com a caneta e depois copie na linha de baixo. Use a caneta-tinteiro com suavização alta.', draw(c){ calTrain(c, CAL.cur, 'cursiva'); } },
+  'cal-treino-bastao':  { name: 'Treino de bastão (para cobrir)', cat: 'Caligrafia', snapFn: () => [CAL.bas.top + CAL.bas.a + CAL.bas.x, CAL.bas.period], help: 'Cubra as letras de forma cinza e depois copie na linha de baixo, mantendo a mesma altura.', draw(c){ calTrain(c, CAL.bas, 'bastao'); } },
   // ---------- Provas e estudo ----------
   'conteudo': { name: 'Conteúdo programático', cat: 'Provas e estudo', help: 'Liste os tópicos da prova e marque o andamento de cada um: vi, resumi e revisei. Marque também a dificuldade.', draw(c){
       tText(c, 'Conteúdo da prova', 50, 78, 38, '#2f3850', 700);
@@ -1085,9 +1109,40 @@ const TEMPLATES = {
       else if (o.pat === 'pontos') tDots(c, sp, col, 0, top, W, H);
       if (o.margin) tVL(c, 95, top, H, MARG, 1.3); } }
 };
+/* Medidas das pautas de caligrafia (em unidades da folha) */
+const CAL = {
+  cur: { top: 130, a: 30, x: 30, d: 28, period: 116 },   // ascendente, corpo (x), descendente
+  bas: { top: 130, a: 34, x: 34, d: 20, period: 118 }
+};
+function calGuides(c, g, slant, ticks){
+  tText(c, 'Nome:', 50, 72, 19); tHL(c, 115, 560, 74); tText(c, 'Data:', 600, 72, 19); tHL(c, 655, 950, 74);
+  for (let y = g.top; y + g.a + g.x + g.d <= H - 30; y += g.period) {
+    const yx = y + g.a, yb = yx + g.x, yd = yb + g.d;
+    c.fillStyle = 'rgba(124,160,224,.07)'; c.fillRect(40, yx, W - 80, g.x);           // faixa do corpo da letra
+    tHL(c, 40, W - 40, y, '#c9d3e6', 1.1);                                              // linha das hastes
+    c.setLineDash([9, 7]); tHL(c, 40, W - 40, yx, '#8fa9db', 1.3); c.setLineDash([]);   // altura do corpo
+    tHL(c, 40, W - 40, yb, '#5b7fcf', 1.9);                                             // linha de base
+    tHL(c, 40, W - 40, yd, '#e3b0b0', 1.1);                                             // linha das pernas
+    if (slant) { c.save(); c.beginPath(); c.rect(40, y, W - 80, yd - y); c.clip(); c.strokeStyle = '#dfe5f0'; c.lineWidth = 1 * LW; c.beginPath(); const dx = Math.tan(Math.PI / 12) * (yd - y); for (let x = 20; x < W + dx; x += 36) { c.moveTo(x, yd); c.lineTo(x + dx, y); } c.stroke(); c.restore(); }
+    if (ticks) { c.strokeStyle = '#d5dcea'; c.lineWidth = 1 * LW; c.beginPath(); for (let x = 80; x < W - 40; x += 46) { c.moveTo(x, yb - 6); c.lineTo(x, yb + 6); } c.stroke(); }
+  }
+}
+const CAL_TEXT = {
+  cursiva: ['a b c d e f g h i', 'j k l m n o p q r', 's t u v w x y z', 'A B C D E F G H', 'I J K L M N O P', 'Q R S T U V W X Y Z', 'química caderno', 'Estudar um pouco todo dia.'],
+  bastao:  ['A B C D E F G H I J', 'K L M N O P Q R S', 'T U V W X Y Z', 'a b c d e f g h i j', 'k l m n o p q r s', 't u v w x y z', 'QUÍMICA  Química', 'Estudar todo dia.']
+};
+function calTrain(c, g, kind){
+  calGuides(c, g, false, kind === 'bastao');
+  const lines = CAL_TEXT[kind];
+  const font = kind === 'cursiva' ? '300 ' + Math.round((g.a + g.x) * 1.32) + 'px "Playwrite BR", cursive' : '400 ' + Math.round((g.a + g.x) * 1.36) + 'px "Andika", "Figtree", sans-serif';
+  c.save(); c.font = font; c.fillStyle = '#c2c9d6'; c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+  let i = 0;
+  for (let y = g.top; y + g.a + g.x + g.d <= H - 30 && i < lines.length; y += g.period * 2, i++) c.fillText(lines[i], 60, y + g.a + g.x);   // modelo; a linha seguinte fica livre para copiar
+  c.restore();
+}
 const TPL_ALIASES = { pautado: 'linha', quadriculado: 'grade', pontilhado: 'pontos' };
 const tplKey = k => TPL_ALIASES[k] || (TEMPLATES[k] ? k : 'linha');
-const CATS = ['Básicos', 'Provas e estudo', 'Acadêmico', 'Planners', 'Diários', 'Criativo', 'Personalizado'];
+const CATS = ['Básicos', 'Caligrafia', 'Provas e estudo', 'Acadêmico', 'Planners', 'Diários', 'Criativo', 'Personalizado'];
 function drawTemplate(c, tpl, o, lwMul){
   o = o || {}; LW = lwMul || 1;
   c.fillStyle = o.paper || '#ffffff'; c.fillRect(0, 0, W, H);
@@ -1169,7 +1224,7 @@ function encodeItem(it){
   }
   const u8 = new Uint8Array(a.buffer); let s = '';
   for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
-  return it.t + '|' + String(it.c).replace(/\|/g, '') + '|' + (+it.w.toFixed(3)) + '|' + btoa(s) + '|' + (it.k == null ? '' : +it.k.toFixed(3));
+  return it.t + '|' + String(it.c).replace(/\|/g, '') + '|' + (+it.w.toFixed(3)) + '|' + btoa(s) + '|' + (it.k == null ? '' : +it.k.toFixed(3)) + (it.f ? '|' + it.f : '');
 }
 function decodeItem(line){
   if (line.startsWith('o|')) { const o = JSON.parse(line.slice(2)); return o && o.t ? o : null; }
@@ -1180,6 +1235,7 @@ function decodeItem(line){
   for (let i = 0; i < a.length; i += 3) { pts[i] = a[i] / 4; pts[i+1] = a[i+1] / 4; pts[i+2] = a[i+2] / 1000; }
   const st = { t: parts[0], c: parts[1], w: parseFloat(parts[2]) || 3, pts };
   if (parts[4] !== undefined && parts[4] !== '') st.k = parseFloat(parts[4]);
+  if (parts[5] === 'l' || parts[5] === 's') st.f = parts[5];
   st.enc = line; return st;
 }
 function chunkPage(items){
@@ -1659,6 +1715,7 @@ function pickTemplate(curTpl, curTo, title){
       };
       sheetOnClose = () => { if (!done) resolve(null); };
       draw();
+      fontsReady.then(() => refresh());
     });
   });
 }
@@ -1725,6 +1782,7 @@ $('#newNb').onclick = async () => { const nb = await createNotebook(); if (nb) o
 $('#newNb2').onclick = $('#newNb').onclick;
 $('#homeMore').onclick = () => showMenu($('#homeMore'), [
   { text: 'Aparência do app', run: openAppearance },
+  { text: 'Tela cheia…', run: openFullscreenOptions },
   '-',
   { label: 'Cópia de segurança' },
   ...(downloads ? [{ text: 'Fazer backup de todos os cadernos', run: makeBackup }] : []),
@@ -1806,6 +1864,76 @@ async function openNotebook(id){
       if (ok) penTest();
     }, 700);
   } else if (!LS.get('caderno.tip3')) { LS.set('caderno.tip3', '1'); toast('Dica: toque de novo no ícone da caneta para escolher o tipo e ajustar a leveza. Segure a caneta parada no fim do traço para virar forma perfeita.', 8000); }
+}
+/* ---------- Tela cheia: esconde as barras do Android, assim o toque da mão na borda não tira você do app ---------- */
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const fsCan = () => !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+let FS_ALWAYS = LS.get('caderno.fs') === '1';
+async function enterFs(quiet){
+  if (fsEl()) return true;
+  const el = document.documentElement;
+  try { await (el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : el.webkitRequestFullscreen()); return true; }
+  catch (_) { if (!quiet) toast(STANDALONE ? 'O tablet não deixou abrir em tela cheia agora. Toque de novo no botão.' : 'Aqui dentro do Claude a tela cheia não funciona. No app instalado no tablet, funciona.', 4500); return false; }
+}
+function exitFs(){ try { if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (_) {} }
+function syncFsBtn(){ const b = $('#fsBtn'); if (!b) return; const on = !!fsEl(); b.setAttribute('aria-pressed', on); b.title = on ? 'Sair da tela cheia' : 'Tela cheia'; b.innerHTML = on ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>'; }
+document.addEventListener('fullscreenchange', syncFsBtn); document.addEventListener('webkitfullscreenchange', syncFsBtn);
+$('#fsBtn').onclick = () => { if (fsEl()) { exitFs(); if (FS_ALWAYS) { FS_ALWAYS = false; LS.set('caderno.fs', '0'); toast('Tela cheia desligada. Para deixar sempre ligada: ⋮ → Tela cheia.'); } } else enterFs(); };
+// com "sempre em tela cheia", o primeiro toque já volta para a tela cheia (o navegador só deixa entrar depois de um toque)
+document.addEventListener('pointerup', () => { if (FS_ALWAYS && !fsEl() && fsCan()) enterFs(true); }, true);
+function openFullscreenOptions(){
+  openDialog((box, close) => {
+    box.innerHTML = '<h3>Tela cheia</h3><p class="panel-note" style="margin:0 0 12px">Esconde a barra de cima e os botões do tablet. Assim, se a mão encostar na borda da tela enquanto você escreve, o app não sai nem volta. Para ver as barras de novo, deslize a partir da borda.</p><div id="fsOpts" style="display:flex;flex-direction:column;gap:12px"></div><p class="panel-note" style="margin:12px 0 0">Dica: se mesmo assim o app fechar ao escrever perto da borda, no tablet abra Configurações → Tela → Barra de navegação e escolha "Botões" em vez de "Gestos".</p><div class="actions"><button class="btn" type="button" data-a="no">Fechar</button><button class="btn primary" type="button" data-a="ok">Entrar em tela cheia agora</button></div>';
+    box.querySelector('#fsOpts').appendChild(toggleRow('Sempre em tela cheia', 'Toda vez que abrir o app, ele fica em tela cheia', FS_ALWAYS, v => { FS_ALWAYS = v; LS.set('caderno.fs', v ? '1' : '0'); }));
+    box.querySelector('[data-a=no]').onclick = () => close(null);
+    box.querySelector('[data-a=ok]').onclick = () => { close(null); enterFs(); };
+  });
+}
+/* Gesto de voltar do Android: em vez de fechar o app, fecha a janela aberta ou volta para a tela inicial */
+if (STANDALONE && window.history && history.pushState) {
+  try { history.replaceState({ cd: 0 }, ''); history.pushState({ cd: 1 }, ''); } catch (_) {}
+  window.addEventListener('popstate', () => {
+    try { history.pushState({ cd: 1 }, ''); } catch (_) {}
+    const scrims = [...document.querySelectorAll('.scrim')].filter(x => x._close);
+    if (openPop) closePop();
+    else if (document.getElementById('sheet')) closeSheet();
+    else if (scrims.length) scrims[scrims.length - 1]._close(null);
+    else if (S.editing) commitText();
+    else if (S.sel.length) clearSel();
+    else if (S.pad) closePad();
+    else if (S.nb) goHome();
+    else toast('Para sair do Caderno, use o botão de início do tablet.');
+  });
+}
+
+/* ---------- Virar texto enquanto escreve: pausou de escrever, a letra vira texto digitado ---------- */
+let autoBuf = [], autoTimer = 0, autoBusy = false;
+function autoTextHold(){ clearTimeout(autoTimer); }
+function queueAutoText(st){ autoBuf.push(st); clearTimeout(autoTimer); autoTimer = setTimeout(runAutoText, 1300); }
+async function runAutoText(){
+  if (autoBusy) { autoTimer = setTimeout(runAutoText, 600); return; }
+  if (drawing && drawing.kind === 'stroke') { autoTimer = setTimeout(runAutoText, 600); return; }
+  const live = new Set(S.items); const strokes = autoBuf.filter(st => live.has(st)); autoBuf = [];
+  if (!strokes.length || !S.nb) return;
+  const pageAt = S.pageIdx; autoBusy = true; inputBadge('Lendo…');
+  try {
+    const txt = await inkToText(strokes);
+    if (!txt || S.pageIdx !== pageAt) return;
+    const now = new Set(S.items); if (!strokes.every(st => now.has(st))) return;   // apagou ou mexeu enquanto lia
+    const b = unionBB(strokes), lines = txt.split('\n').length, sz = clamp(Math.round((b[3] - b[1]) / (lines * 1.25)), 16, 72);
+    const item = { t: 'x', x: b[0], y: b[1], w: clamp(Math.max(b[2] - b[0] + sz, 120), 80, W - b[0] - 10), s: sz, f: S.text.f || 's', c: strokes[0].c, b: false, txt };
+    pushUndo(S.items);
+    const set = new Set(strokes), idx = S.items.findIndex(it => set.has(it));
+    S.items = S.items.filter(it => !set.has(it)); S.items.splice(Math.max(0, idx), 0, item);
+    renderInk(); markDirty();
+  } catch (e) { toast(navigator.onLine ? 'Não consegui ler essa parte. Ela ficou como letra à mão.' : 'Sem internet: a letra fica à mão por enquanto.', 3000); }
+  finally { autoBusy = false; }
+}
+async function inkToText(strokes){
+  if (sample && sampleImages && !STANDALONE) return sampleText(strokes);
+  const lines = inkLines(strokes), out = [];
+  for (const ln of lines) { const c = await recognizeLine(ln); if (c[0]) out.push(c[0]); }
+  return out.join('\n').trim();
 }
 async function goHome(skipFlush){
   commitText(); clearSel(); closePad(); stopSharedSub();
@@ -1920,6 +2048,10 @@ function buildCtx(){
     const szc = sizeControl(() => S.penCfg[S.pen].w, v => S.penCfg[S.pen].w = v, 0.5, 14, 'pen');
     ctx.appendChild(swatchRow(PEN_COLORS, S.penColor, c => { S.penColor = c; savePrefs(); syncToolUI(); szc._sync(); sb.querySelector('svg').outerHTML = penSVG(S.pen, c); }));
     ctx.appendChild(sepEl()); ctx.appendChild(szc);
+    if (canReadInk()) {
+      const at = chipBtn('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c2-4 3-6 4-6s0 6 2 6 3-8 5-8"/><path d="M15 6h6M18 6v10"/></svg>', 'Virar texto', !!S.autoText, () => { S.autoText = !S.autoText; buildCtx(); toast(S.autoText ? 'Ligado: escreva normalmente. Quando você pausa, a sua letra vira texto digitado (na letra escolhida na ferramenta Texto). Desfazer volta à letra à mão.' : 'Desligado: a letra fica à mão.', 4500); }, 'Escreva e a letra vira texto digitado', true);
+      ctx.appendChild(sepEl()); ctx.appendChild(at);
+    }
   } else if (S.tool === 'hl') {
     const szc = sizeControl(() => S.hlW, v => S.hlW = v, 3, 20, 'hl');
     const sm = chipBtn(ico('<path d="M4 12h16"/><path d="M7 8l-3 4 3 4M17 8l3 4-3 4"/>'), 'Inteligente', S.hlStraight, () => { openHlPanel(sm); }, 'Marca-texto inteligente', true);
@@ -1958,7 +2090,7 @@ function buildCtx(){
     ctx.appendChild(swatchRow(PEN_COLORS, S.penColor, c => { S.penColor = c; savePrefs(); syncToolUI(); szc._sync(); }));
     ctx.appendChild(sepEl()); ctx.appendChild(szc);
     const h = document.createElement('span'); h.className = 'hint';
-    h.textContent = S.shape === 'auto' ? 'Desenhe à mão: círculo, quadrado, triângulo, losango, linha… e eu deixo perfeito.' : 'Arraste na folha de um canto ao outro.';
+    h.textContent = S.shape === 'auto' ? 'Desenhe à mão: círculo, quadrado, triângulo, losango, linha… e eu deixo perfeito. Toque numa forma pronta para mudar o tamanho.' : 'Arraste na folha de um canto ao outro. Toque numa forma pronta para mudar o tamanho.';
     ctx.appendChild(h);
   }
   else if (S.tool === 'laser') { const h = document.createElement('span'); h.className = 'hint'; h.textContent = 'Aponte na folha. O traço some sozinho e não fica salvo.'; ctx.appendChild(h); }
@@ -1978,13 +2110,21 @@ function openTapePanel(anchor){
   const p = document.createElement('p'); p.className = 'panel-note'; p.textContent = 'Para estudar: passe uma fita lisa sobre uma resposta e use o laço para mover ou excluir a fita quando quiser conferir.';
   el.appendChild(p); placePop(el, anchor);
 }
+function pickFont(anchor, cur, onPick){
+  closePop(); const el = document.createElement('div'); el.className = 'menu'; el.style.cssText = 'max-height:70vh;overflow:auto;min-width:260px';
+  el.appendChild(Object.assign(document.createElement('div'), { className: 'mlabel', textContent: 'Tipo de letra' }));
+  for (const k in FONTS) {
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'menuitemradio'); b.setAttribute('aria-checked', cur === k);
+    b.style.cssText = 'font-family:' + FONTS[k].css + ';font-size:21px;padding:10px 14px'; b.textContent = FONTS[k].name;
+    b.onclick = () => { closePop(); onPick(k); }; el.appendChild(b);
+  }
+  placePop(el, anchor);
+}
 function buildTextCtx(ctx){
   const T = S.editing ? S.editing : S.text;
-  for (const k in FONTS) {
-    const b = chipBtn('', FONTS[k].name, T.f === k, () => { T.f = k; if (T !== S.text) S.text.f = k; savePrefs(); styleTextEd(); buildCtx(); }, '', true);
-    b.querySelector('.lbl').style.fontFamily = FONTS[k].css; if (k === 'h') b.querySelector('.lbl').style.fontSize = '16px';
-    ctx.appendChild(b);
-  }
+  const fb = chipBtn('', (FONTS[T.f] || FONTS.s).name + ' ▾', undefined, () => pickFont(fb, T.f, k => { T.f = k; if (T !== S.text) S.text.f = k; savePrefs(); styleTextEd(); buildCtx(); }), 'Escolher a letra', true);
+  fb.querySelector('.lbl').style.fontFamily = (FONTS[T.f] || FONTS.s).css;
+  ctx.appendChild(fb);
   const minus = chipBtn('', 'A−', undefined, () => { T.s = clamp(Math.round(T.s - 4), 14, 140); if (T !== S.text) S.text.s = T.s; savePrefs(); styleTextEd(); }, 'Diminuir letra', true);
   const plus = chipBtn('', 'A+', undefined, () => { T.s = clamp(Math.round(T.s + 4), 14, 140); if (T !== S.text) S.text.s = T.s; savePrefs(); styleTextEd(); }, 'Aumentar letra', true);
   const bold = chipBtn('', 'N', T.b, () => { T.b = !T.b; if (T !== S.text) S.text.b = T.b; savePrefs(); styleTextEd(); buildCtx(); }, 'Negrito', true);
@@ -2173,6 +2313,10 @@ function openPenPanel(anchor){
     if (S.pen !== 'm') add('k', 'Variação de espessura', 0, 100, 1, pct, 'Quanto a pressão muda a grossura. 0% = traço uniforme.');
     if (S.pen !== 'm') add('lev', 'Leveza do toque', 0, 100, 1, pct, 'Mais leveza: um toque suave já dá traço cheio. Menos: precisa apertar mais.');
     add('suav', 'Suavização', 0, 100, 1, pct, 'Corrige o tremido da mão. Mais alto = letra mais firme, com leve atraso.');
+    const pre = document.createElement('button'); pre.type = 'button'; pre.className = 'btn primary'; pre.textContent = '✨ Ajuste "letra bonita"';
+    pre.title = 'Caneta-tinteiro fina, com variação de traço e suavização alta';
+    pre.onclick = () => { S.pen = 'f'; Object.assign(S.penCfg.f, { w: 2.6, k: 62, lev: 58, suav: 82 }); savePrefs(); build(); buildCtx(); toast('Pronto: caneta-tinteiro fina com suavização alta. Escreva devagar e com a mão leve.'); };
+    sl.appendChild(pre);
     requestAnimationFrame(redraw);
   };
   build();
@@ -2288,7 +2432,11 @@ function drawStroke(c, st){
   if (st.t === 't') { drawTape(c, st); return; }
   if (st.t === 'h') { c.save(); c.globalAlpha = 0.36; c.globalCompositeOperation = 'multiply'; c.strokeStyle = st.c; c.lineWidth = st.w * 2.4; c.lineCap = (st.sq || (n > 2 && P[1] === P[(n-1)*3+1] && P[4] === P[1])) ? 'butt' : 'round'; smoothPath(c, P, n); c.stroke(); c.restore(); return; }
   if (st.t === 'm') { c.strokeStyle = st.c; c.lineWidth = rawW(st, 0); smoothPath(c, P, n); c.stroke(); return; }
-  if (st.t === 'p' && st.k === 0 && n > 2) { c.strokeStyle = st.c; c.lineWidth = st.w; smoothPath(c, P, n); c.stroke(); return; }   // formas: traço único, liso
+  if (st.t === 'p' && st.k === 0 && n > 2) {   // formas: traço único, liso (com preenchimento opcional)
+    smoothPath(c, P, n);
+    if (st.f) { c.save(); c.fillStyle = st.c; c.globalAlpha = st.f === 's' ? 1 : 0.22; c.fill(); c.restore(); }
+    c.strokeStyle = st.c; c.lineWidth = st.w; c.stroke(); return;
+  }   // formas: traço único, liso
   const paint = st.t === 'l' ? patternFrom(c, pencilTile(st.c)) : st.c;
   c.strokeStyle = paint; c.fillStyle = paint;
   if (n === 1) { c.beginPath(); c.arc(P[0], P[1], rawW(st, 0) / 2, 0, Math.PI * 2); c.fill(); return; }
@@ -2381,7 +2529,7 @@ function renderInk(){
   }
 }
 function clearLive(){ liveX.setTransform(1, 0, 0, 1, 0, 0); liveX.clearRect(0, 0, liveC.width, liveC.height); setView(liveX); }
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { for (const it of S.items) delete it._lay; if (S.nb) renderAll(); });
+if (document.fonts && document.fonts.ready) Promise.all([document.fonts.ready, fontsReady]).then(() => { for (const it of S.items) delete it._lay; if (S.nb) { renderAll(); if (S.pad) renderPad(); } });
 
 /* ---------- Caixas e colisão ---------- */
 function bbox(it){
@@ -2411,7 +2559,9 @@ function segDist(px, py, ax, ay, bx, by){
   let t = l ? ((px - ax) * dx + (py - ay) * dy) / l : 0; t = clamp(t, 0, 1);
   const x = ax + t * dx - px, y = ay + t * dy - py; return Math.sqrt(x*x + y*y);
 }
+function inPoly(P, x, y){ let ins = false; for (let i = 0, j = P.length - 3; i < P.length; j = i, i += 3) { const xi = P[i], yi = P[i+1], xj = P[j], yj = P[j+1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) ins = !ins; } return ins; }
 function hits(st, x, y, r){
+  if (st.f && inPoly(st.pts, x, y)) return true;
   const bb = bbox(st), pad = r + (st.t === 't' ? tapeWidth(st) / 2 : st.w * (st.t === 'h' ? 1.3 : 0.8));
   if (x < bb[0] - r || x > bb[2] + r || y < bb[1] - r || y > bb[3] + r) return false;
   const P = st.pts;
@@ -2419,10 +2569,12 @@ function hits(st, x, y, r){
   for (let i = 3; i < P.length; i += 3) if (segDist(x, y, P[i-3], P[i-2], P[i], P[i+1]) < pad) return true;
   return false;
 }
-function hitItem(x, y, objectsOnly, noText){
+let shapeHintShown = false;
+function shapeHint(){ if (shapeHintShown) return; shapeHintShown = true; setTimeout(() => toast('Para aumentar ou diminuir: toque na linha da forma e arraste as bolinhas. A azul muda o tamanho todo; as brancas esticam só a largura ou a altura.', 5500), 200); }
+function hitItem(x, y, objectsOnly, noText, tol){
   for (let i = S.items.length - 1; i >= 0; i--) {
     const it = S.items[i];
-    if (isStroke(it)) { if (!objectsOnly && hits(it, x, y, 8)) return it; }
+    if (isStroke(it)) { if (!objectsOnly && hits(it, x, y, tol || 8)) return it; }
     else { if (it.bg || (objectsOnly && noText && it.t === 'x')) continue; const b = bbox(it); if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) return it; }
   }
   return null;
@@ -2585,6 +2737,7 @@ function positionOverlays(){
     const b = unionBB(S.sel), [sx, sy] = pageToScreen(b[0] - 6, b[1] - 6), [ex, ey] = pageToScreen(b[2] + 6, b[3] + 6);
     selBox.style.left = sx + 'px'; selBox.style.top = sy + 'px'; selBox.style.width = (ex - sx) + 'px'; selBox.style.height = (ey - sy) + 'px';
     selBox.classList.remove('hidden'); selBar.classList.remove('hidden');
+    selBox.classList.toggle('stretch', S.sel.every(it => isStroke(it) && it.t !== 't'));
     const bw = selBar.offsetWidth, bh = selBar.offsetHeight, vw = vp.clientWidth, vh = vp.clientHeight;
     let top = sy - bh - 12; if (top < 6) top = Math.min(ey + 20, vh - bh - 6);
     selBar.style.left = clamp((sx + ex) / 2 - bw / 2, 6, Math.max(6, vw - bw - 6)) + 'px'; selBar.style.top = clamp(top, 6, Math.max(6, vh - bh - 6)) + 'px';
@@ -2598,24 +2751,27 @@ function buildSelBar(){
   const add = (html, label, fn, danger) => { const b = document.createElement('button'); b.type = 'button'; b.innerHTML = html + '<span></span>'; b.querySelector('span').textContent = label; if (danger) b.className = 'danger'; b.onclick = fn; selBar.appendChild(b); return b; };
   const strokes = S.sel.filter(isStroke);
   if (S.sel.length === 1 && S.sel[0].t === 'x') add(ico('<path d="M4 20h4L19 9l-4-4L4 16z"/>'), 'Editar', () => { const it = S.sel[0]; clearSel(); setTool('text'); openTextEditor(it.x, it.y, it); });
-  if (strokes.some(s => s.t !== 'h' && s.t !== 't') && sample && sampleImages) add(ico('<path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/>'), 'Em texto', convertSelection);
+  if (strokes.filter(s => s.t !== 'h' && s.t !== 't').length >= 2) add(ico('<path d="M4 18h16"/><path d="M6 14l3-6 3 6M14 14V8h3a2 2 0 010 4h-3"/>'), 'Arrumar', tidyHandwriting);
+  if (strokes.some(s => s.t !== 'h' && s.t !== 't') && canReadInk()) add(ico('<path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/>'), 'Em texto', readHandwriting);
   if (S.sel.some(it => (isStroke(it) && it.t !== 't') || it.t === 'x')) add(ico('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 000 16z" fill="currentColor"/>'), 'Cor', e => {
     closePop(); const el = document.createElement('div'); el.className = 'menu'; el.style.padding = '10px';
     el.appendChild(swatchRow(PEN_COLORS.concat(HL_COLORS.slice(0, 2)), '', c => { closePop(); recolor(c); }));
     placePop(el, e.currentTarget);
   });
-  if (S.sel.length === 1 && !isStroke(S.sel[0])) add(ico('<rect x="4" y="4" width="11" height="11" rx="2"/><rect x="9" y="9" width="11" height="11" rx="2" fill="currentColor" opacity=".25"/>'), 'Frente', bringFront);
+  add(ico('<circle cx="9" cy="9" r="5"/><rect x="10" y="10" width="10" height="10" rx="2" fill="currentColor" opacity=".3"/>'), S.sel.some(isShapeSt) ? 'Forma' : S.sel.some(isStroke) ? 'Estilo' : 'Posição', e => openStylePop(e.currentTarget));
   add(ico('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>'), 'Copiar', () => copyItems(S.sel, false));
   add(ico('<circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.2 16L18 4M15.8 16L6 4"/>'), 'Recortar', () => copyItems(S.sel, true));
   add(ico('<rect x="4" y="4" width="11" height="11" rx="2"/><rect x="9" y="9" width="11" height="11" rx="2"/>'), 'Duplicar', duplicateSel);
   add(ico('<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>'), 'Excluir', deleteSel, true);
 }
-function xform(it, ox, oy, sc, dx, dy){
-  const X = v => ox + (v - ox) * sc + dx, Y = v => oy + (v - oy) * sc + dy;
+function xform(it, ox, oy, sc, dx, dy, scy){
+  const sy = scy == null ? sc : scy, keepW = scy != null;      // esticar só largura/altura: a grossura da linha não muda
+  const X = v => ox + (v - ox) * sc + dx, Y = v => oy + (v - oy) * sy + dy;
+  if (scy != null && !isStroke(it)) sc = Math.sqrt(sc * sy);
   if (isStroke(it)) {
     const P = it.pts, Q = new Array(P.length);
     for (let i = 0; i < P.length; i += 3) { Q[i] = X(P[i]); Q[i+1] = Y(P[i+1]); Q[i+2] = P[i+2]; }
-    const o = { t: it.t, c: it.c, w: it.w * sc, pts: Q }; if (it.k != null) o.k = it.k; if (it.sq) o.sq = 1; return o;
+    const o = { t: it.t, c: it.c, w: keepW ? it.w : it.w * sc, pts: Q }; if (it.k != null) o.k = it.k; if (it.sq) o.sq = 1; if (it.f) o.f = it.f; return o;
   }
   const o = cleanObj(it); o.x = X(it.x); o.y = Y(it.y);
   if (it._sh) o._sh = true;
@@ -2633,8 +2789,160 @@ function replaceSel(fn){
 function recolor(c){ replaceSel(it => (isStroke(it) && it.t !== 't') || it.t === 'x' ? Object.assign(isStroke(it) ? xform(it, 0, 0, 1, 0, 0) : cleanObj(it), { c }) : it); }
 function duplicateSel(){ pushUndo(S.items); const copies = S.sel.map(it => xform(it, 0, 0, 1, 24, 24)); S.items = S.items.concat(copies); renderInk(); setSel(copies); markDirty(); }
 function deleteSel(){ pushUndo(S.items); const set = new Set(S.sel); S.items = S.items.filter(it => !set.has(it)); renderInk(); setSel([]); markDirty(); }
+function sendBack(){ pushUndo(S.items); const set = new Set(S.sel); const rest = S.items.filter(it => !set.has(it)); const bgs = rest.filter(it => it.bg), others = rest.filter(it => !it.bg); S.items = bgs.concat(S.sel, others); renderInk(); markDirty(); toast('Foi para o fundo.'); }
+const isShapeSt = it => isStroke(it) && it.t === 'p' && it.k === 0;
+function openStylePop(anchor){
+  closePop();
+  const el = document.createElement('div'); el.className = 'menu'; el.style.cssText = 'padding:12px 14px;display:flex;flex-direction:column;gap:12px;min-width:270px';
+  let lines = S.sel.filter(it => isStroke(it) && it.t !== 't'); const shapes = S.sel.filter(isShapeSt);
+  const label = t => { const d = document.createElement('div'); d.className = 'mlabel'; d.style.padding = '0'; d.textContent = t; return d; };
+  if (lines.length) {
+    el.appendChild(label('Espessura da linha'));
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:10px';
+    const r = document.createElement('input'); r.type = 'range'; r.min = 0.5; r.max = 24; r.step = 0.5; r.value = lines[0].w; r.style.flex = '1'; r.setAttribute('aria-label', 'Espessura da linha');
+    const out = document.createElement('output'); out.style.minWidth = '34px'; out.textContent = (+r.value).toFixed(1);
+    let saved = false;
+    r.oninput = () => {
+      if (!saved) { replaceSel(it => isStroke(it) ? xform(it, 0, 0, 1, 0, 0) : it); lines = S.sel.filter(it => isStroke(it) && it.t !== 't'); saved = true; }   // cópias: o desfazer volta à espessura antiga
+      const v = +r.value; out.textContent = v.toFixed(1);
+      const ratio = v / lines[0].w;
+      for (const st of lines) { st.w = Math.max(0.3, st === lines[0] ? v : st.w * ratio); delete st.enc; delete st.bb; delete st.ws; delete st._path; }
+      renderInk(); positionOverlays();
+    };
+    r.onchange = () => { markDirty(); saved = false; };
+    row.appendChild(r); row.appendChild(out); el.appendChild(row);
+  }
+  if (shapes.length) {
+    el.appendChild(label('Preenchimento'));
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+    [['', 'Vazia'], ['l', 'Clarinha'], ['s', 'Cheia']].forEach(([k, l]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = l; b.setAttribute('aria-pressed', (shapes[0].f || '') === k);
+      b.onclick = () => { const set = new Set(shapes); replaceSel(it => { if (!set.has(it)) return it; const o = xform(it, 0, 0, 1, 0, 0); if (k) o.f = k; else delete o.f; return o; }); row.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === b)); };
+      row.appendChild(b);
+    });
+    el.appendChild(row);
+  }
+  el.appendChild(label('Posição'));
+  const ord = document.createElement('div'); ord.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+  [['Por cima de tudo', bringFront], ['Ao fundo', sendBack]].forEach(([l, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = l; b.onclick = () => { fn(); closePop(); }; ord.appendChild(b); });
+  el.appendChild(ord);
+  placePop(el, anchor);
+}
 function bringFront(){ pushUndo(S.items); const set = new Set(S.sel); S.items = S.items.filter(it => !set.has(it)).concat(S.sel); renderInk(); markDirty(); }
 
+/* Arrumar a escrita: deixa a linha reta (tira a inclinação da frase) e encaixa as letras na pauta da página */
+function tidyHandwriting(){
+  const ink = S.sel.filter(s => isStroke(s) && s.t !== 'h' && s.t !== 't'); if (ink.length < 2) return;
+  const boxes = ink.map(inkBox), cx = boxes.map(b => (b[0] + b[2]) / 2), cy = boxes.map(b => (b[1] + b[3]) / 2);
+  // inclinação da linha (Theil-Sen: mediana das inclinações entre pares, resiste a letras que sobem ou descem)
+  const slopes = [];
+  for (let i = 0; i < ink.length; i++) for (let j = i + 1; j < ink.length; j++) { const dx = cx[j] - cx[i]; if (Math.abs(dx) > 15) slopes.push((cy[j] - cy[i]) / dx); }
+  slopes.sort((a, b) => a - b);
+  let ang = slopes.length ? Math.atan(slopes[Math.floor(slopes.length / 2)]) : 0;
+  if (Math.abs(ang) > 0.35) ang = 0;                   // inclinação absurda: provavelmente não é uma linha de texto
+  const u = unionBB(ink), ox = (u[0] + u[2]) / 2, oy = (u[1] + u[3]) / 2, cs2 = Math.cos(-ang), sn2 = Math.sin(-ang);
+  const rot = (x, y) => [ox + (x - ox) * cs2 - (y - oy) * sn2, oy + (x - ox) * sn2 + (y - oy) * cs2];
+  // depois de endireitar: onde fica a base das letras (40% mais baixos dos fundos das letras, sem as pernas)
+  const bottoms = ink.map(st => { let m = -1e9; for (let i = 0; i < st.pts.length; i += 3) m = Math.max(m, rot(st.pts[i], st.pts[i+1])[1]); return m; }).sort((a, b) => a - b);
+  const base = bottoms[Math.floor(bottoms.length * 0.4)];
+  let dy = 0; const sn = lineSnap(curPage());
+  if (sn) { const [y0s, sp] = sn; const k = Math.round((base - y0s) / sp); const target = y0s + k * sp; if (Math.abs(target - base) < sp * 0.6) dy = target - base; }
+  const set = new Set(ink);
+  replaceSel(it => {
+    if (!set.has(it)) return xform(it, 0, 0, 1, 0, dy);
+    const P = it.pts, Q = new Array(P.length);
+    for (let i = 0; i < P.length; i += 3) { const [x, y] = rot(P[i], P[i+1]); Q[i] = x; Q[i+1] = y + dy; Q[i+2] = P[i+2]; }
+    const o = { t: it.t, c: it.c, w: it.w, pts: Q }; if (it.k != null) o.k = it.k; return o;
+  });
+  toast(sn ? 'Pronto: a linha ficou reta e as letras foram encaixadas na pauta. Toque em desfazer se não gostar.' : 'Pronto: a linha ficou reta. Toque em desfazer se não gostar.', 4000);
+}
+/* Leitura da letra à mão: separa as linhas e manda os traços (só os selecionados) para o leitor de escrita */
+function inkLines(strokes){
+  const info = strokes.map((st, i) => { const b = inkBox(st); return { st, i, b, cy: (b[1] + b[3]) / 2, h: b[3] - b[1] }; });
+  const hs = info.map(o => o.h).sort((a, b) => a - b), lh = Math.max(14, hs[Math.floor(hs.length / 2)] || 20);
+  const lines = [];
+  for (const o of info.slice().sort((a, b) => a.cy - b.cy)) {
+    const ln = lines.find(L => Math.abs(L.cy - o.cy) < lh * 0.9);
+    if (ln) { ln.items.push(o); ln.cy = ln.items.reduce((a, q) => a + q.cy, 0) / ln.items.length; } else lines.push({ cy: o.cy, items: [o] });
+  }
+  return lines.sort((a, b) => a.cy - b.cy).map(L => L.items.sort((a, b) => a.i - b.i).map(o => o.st));
+}
+async function recognizeLine(strokes){
+  const u = unionBB(strokes), ox = u[0], oy = u[1];
+  if (navigator.createHandwritingRecognizer) {   // leitor do próprio Chrome (quando o aparelho tem)
+    try {
+      const rec = await navigator.createHandwritingRecognizer({ languages: ['pt'] }), dr = rec.startDrawing({ recognitionType: 'text', textContext: '' });
+      let t = 0; for (const st of strokes) { const hs = new HandwritingStroke(); for (let i = 0; i < st.pts.length; i += 3) hs.addPoint({ x: st.pts[i] - ox, y: st.pts[i+1] - oy, t: (t += 8) }); dr.addStroke(hs); }
+      const res = await dr.getPrediction(); dr.clear(); rec.finish();
+      if (res && res.length) return res.map(r => r.text).filter(Boolean);
+    } catch (_) {}
+  }
+  let t = 0;
+  const ink = strokes.map(st => { const X = [], Y = [], T = []; for (let i = 0; i < st.pts.length; i += 3) { X.push(Math.round(st.pts[i] - ox)); Y.push(Math.round(st.pts[i+1] - oy)); T.push(t += 8); } t += 120; return [X, Y, T]; });
+  const body = JSON.stringify({ options: 'enable_pre_space', requests: [{ writing_guide: { writing_area_width: Math.round(u[2] - ox + 20), writing_area_height: Math.round(u[3] - oy + 20) }, ink, language: 'pt_BR', max_num_results: 6 }] });
+  const r = await fetch('https://inputtools.google.com/request?ime=handwriting&app=mobilesearch&cs=1&oe=UTF-8', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+  const j = await r.json();
+  if (j[0] !== 'SUCCESS') throw new Error('falhou');
+  return (j[1] && j[1][0] && j[1][0][1]) || [];
+}
+const canReadInk = () => (sample && sampleImages) || STANDALONE || !!navigator.createHandwritingRecognizer;
+async function readHandwriting(){
+  const strokes = S.sel.filter(s => isStroke(s) && s.t !== 'h' && s.t !== 't'); if (!strokes.length) return;
+  if (sample && sampleImages) return convertSelection();
+  if (!navigator.onLine && !navigator.createHandwritingRecognizer) { toast('Para ler a letra é preciso estar com internet.'); return; }
+  toast('Lendo sua letra…', 60000);
+  try {
+    const lines = inkLines(strokes), cands = [];
+    for (const ln of lines) cands.push(await recognizeLine(ln));
+    hideToast();
+    if (!cands.some(c => c.length)) { toast('Não consegui ler essa letra. Tente selecionar menos coisa por vez.'); return; }
+    transcribeDialog(strokes, cands);
+  } catch (e) { hideToast(); toast('Não consegui ler agora. Confira a internet e tente de novo.'); }
+}
+function transcribeDialog(strokes, cands){
+  const b = unionBB(strokes), nLines = cands.length;
+  openDialog((box, close) => {
+    box.innerHTML = '<h3>Transcrever a letra</h3><p class="panel-note" style="margin:0 0 8px">Confira e corrija o texto. Toque numa sugestão para trocar a linha.</p><div id="trSug" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div><textarea id="trTxt" rows="4" style="width:100%;font-size:20px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:inherit;resize:vertical"></textarea><div class="mlabel" style="padding:10px 0 6px">Tipo de letra</div><div id="trFonts" style="display:flex;gap:6px;flex-wrap:wrap"></div><div class="actions" style="flex-wrap:wrap"><button class="btn" type="button" data-a="no">Cancelar</button><button class="btn" type="button" data-a="copy">Copiar texto</button><button class="btn" type="button" data-a="add">Pôr embaixo</button><button class="btn primary" type="button" data-a="ok">Trocar pela letra digitada</button></div>';
+    const ta = box.querySelector('#trTxt'), sug = box.querySelector('#trSug'), fonts = box.querySelector('#trFonts');
+    const cur = cands.map(c => c[0] || '');
+    ta.value = cur.join('\n');
+    cands.forEach((c, li) => {
+      if (c.length < 2) return;
+      const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;align-items:center';
+      if (nLines > 1) row.appendChild(Object.assign(document.createElement('small'), { textContent: 'Linha ' + (li + 1) + ':' }));
+      c.slice(0, 5).forEach(t => { const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'chip'; bt.textContent = t; bt.onclick = () => { const L = ta.value.split('\n'); L[li] = t; ta.value = L.join('\n'); }; row.appendChild(bt); });
+      sug.appendChild(row);
+    });
+    let f = S.text.f && FONTS[S.text.f] ? S.text.f : 's';
+    for (const k in FONTS) { const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'chip'; bt.textContent = FONTS[k].name; bt.style.fontFamily = FONTS[k].css; bt.setAttribute('aria-pressed', k === f); bt.onclick = () => { f = k; ta.style.fontFamily = FONTS[k].css; fonts.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === bt)); }; fonts.appendChild(bt); }
+    ta.style.fontFamily = FONTS[f].css;
+    const place = (replace) => {
+      const txt = ta.value.trim(); if (!txt) { close(null); return; }
+      const lines = txt.split('\n').length, sz = clamp(Math.round((b[3] - b[1]) / (lines * 1.3)), 18, 72);
+      const y = replace ? b[1] : Math.min(H - sz * lines * 1.3 - 10, b[3] + 14);
+      const item = { t: 'x', x: b[0], y, w: clamp(Math.max(b[2] - b[0], 260), 120, W - b[0] - 10), s: sz, f, c: strokes[0].c, b: false, txt };
+      pushUndo(S.items);
+      if (replace) { const set = new Set(strokes); const idx = S.items.findIndex(it => set.has(it)); S.items = S.items.filter(it => !set.has(it)); S.items.splice(Math.max(0, idx), 0, item); }
+      else S.items = S.items.concat([item]);
+      renderInk(); setSel([item]); markDirty(); close(true);
+      toast(replace ? 'Pronto! Toque em desfazer para voltar à letra à mão.' : 'Pronto! O texto digitado ficou embaixo da sua letra.');
+    };
+    box.querySelector('[data-a=no]').onclick = () => close(null);
+    box.querySelector('[data-a=copy]').onclick = async () => { try { await navigator.clipboard.writeText(ta.value); toast('Texto copiado.'); } catch (_) { ta.select(); toast('Selecionei o texto: toque em copiar.'); } };
+    box.querySelector('[data-a=add]').onclick = () => place(false);
+    box.querySelector('[data-a=ok]').onclick = () => place(true);
+  }, true);
+}
+async function sampleText(strokes){
+  const b = unionBB(strokes), pad = 12, sc = 2;
+  const cv = document.createElement('canvas'); cv.width = Math.round((b[2] - b[0] + pad * 2) * sc); cv.height = Math.round((b[3] - b[1] + pad * 2) * sc);
+  const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height);
+  x.setTransform(sc, 0, 0, sc, (pad - b[0]) * sc, (pad - b[1]) * sc);
+  for (const st of strokes) drawStroke(x, st);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  const { text } = await sample('A imagem mostra um trecho escrito à mão num caderno digital, geralmente em português. Transcreva exatamente o texto, preservando as quebras de linha. Em fórmulas de química e matemática, use subscritos e sobrescritos Unicode quando aparecerem (ex.: H₂O, Fe³⁺, x²). Ignore desenhos que não sejam texto. Responda somente com o texto transcrito, sem comentários nem aspas.', { images: [blob] });
+  return String(text || '').trim();
+}
 async function convertSelection(){
   const strokes = S.sel.filter(s => isStroke(s) && s.t !== 'h' && s.t !== 't'); if (!strokes.length || !sample) return;
   const b = unionBB(strokes), pad = 12, sc = 2;
@@ -2648,13 +2956,7 @@ async function convertSelection(){
     const { text } = await sample('A imagem mostra um trecho escrito à mão num caderno digital, geralmente em português. Transcreva exatamente o texto, preservando as quebras de linha. Em fórmulas de química e matemática, use subscritos e sobrescritos Unicode quando aparecerem (ex.: H₂O, Fe³⁺, x²). Ignore desenhos que não sejam texto. Responda somente com o texto transcrito, sem comentários nem aspas.', { images: [blob] });
     hideToast();
     const txt = String(text || '').trim(); if (!txt) { toast('Não encontrei texto nessa seleção.'); return; }
-    const lines = txt.split('\n').length, s = clamp(Math.round((b[3] - b[1]) / (lines * 1.3)), 20, 72);
-    const item = { t: 'x', x: b[0], y: b[1], w: clamp(Math.max(b[2] - b[0], 260), 120, W - b[0] - 10), s, f: 's', c: strokes[0].c, b: false, txt };
-    pushUndo(S.items);
-    const set = new Set(strokes); const idx = S.items.findIndex(it => set.has(it));
-    S.items = S.items.filter(it => !set.has(it)); S.items.splice(Math.max(0, idx), 0, item);
-    renderInk(); setSel([item]); markDirty();
-    toast('Pronto! Toque em desfazer para voltar à letra à mão.');
+    transcribeDialog(strokes, txt.split('\n').map(l => [l]));
   } catch (e) {
     hideToast(); const c = e && e.code;
     if (c === 'not_granted' || c === 'sampling_disabled' || c === 'images_unavailable') { sampleImages = false; buildSelBar(); toast('A conversão em texto não está disponível nesta conta.'); }
@@ -3031,7 +3333,8 @@ function startInput(e, fromPad){
   const [x, y] = toPage(e.clientX, e.clientY);
   const base = { pid: e.pointerId, ptype: e.pointerType, sx: x, sy: y, lx: x, ly: y, moved: false, pad: !!fromPad };
   if (!fromPad && S.sel.length) {
-    if (e.target && e.target.id === 'selHandle') { drawing = Object.assign(base, { kind: 'scale', bb: unionBB(S.sel) }); beginXform(); return; }
+    const hid = e.target && e.target.id;
+    if (hid === 'selHandle' || hid === 'selHandleR' || hid === 'selHandleB') { drawing = Object.assign(base, { kind: 'scale', axis: hid === 'selHandleR' ? 'x' : hid === 'selHandleB' ? 'y' : null, bb: unionBB(S.sel) }); beginXform(); return; }
     if (inSel(x, y)) { drawing = Object.assign(base, { kind: 'move', bb: unionBB(S.sel) }); beginXform(); return; }
     if (S.tool !== 'select') clearSel();
   }
@@ -3046,6 +3349,7 @@ function startInput(e, fromPad){
     drawing = Object.assign(base, { kind: 'stroke', st, rx: x, ry: y, k: 0.3, g: 1, hx: x, hy: y, autoShape: true });
     clearLive(); liveX.lineCap = 'round'; liveX.lineJoin = 'round'; return;
   }
+  if (S.autoText) autoTextHold();
   const isHl = S.tool === 'hl', isTape = S.tool === 'tape', cfg = S.penCfg[S.pen];
   let p = e.pointerType === 'pen' ? (e.pressure || 0.5) : 0.5;
   if (!isHl && !isTape && e.pointerType === 'pen') p = Math.pow(p, levGamma(cfg.lev));
@@ -3077,7 +3381,7 @@ function addPoint(ev){
     liveX.beginPath(); liveX.moveTo(d.poly[0], d.poly[1]); for (let i = 2; i < d.poly.length; i += 2) liveX.lineTo(d.poly[i], d.poly[i+1]); liveX.stroke(); liveX.setLineDash([]);
     return;
   }
-  if (d.kind === 'move' || d.kind === 'scale') { d.lx = x; d.ly = y; drawXform(); return; }
+  if (d.kind === 'move' || d.kind === 'scale') { d.lx = x; d.ly = y; scheduleXform(); return; }
   if (d.kind === 'shape') { d.lx = x; d.ly = y; clearLive(); drawStroke(liveX, { t: 'p', c: S.penColor, w: S.shapeW, k: 0, pts: shapePts(d.shape, d.sx, d.sy, x, y) }); if (d.pad) renderPad(); return; }
   if (d.kind !== 'stroke' || d.shaped) return;
   const st = d.st, P = st.pts, n = P.length / 3;
@@ -3099,19 +3403,38 @@ function addPoint(ev){
     const i = m - 2; penSeg(liveX, st, i, false, rawW(st, i) * (tapers(st.t) ? Math.min(1, 0.35 + 0.65 * i / (st.t === 'b' ? 6 : 4)) : 1));
   }
 }
-function beginXform(){ S.hidden = new Set(S.sel); renderInk(); selBar.classList.add('hidden'); drawXform(); }
+/* Mover/redimensionar: a seleção vira uma "foto" uma vez só e, enquanto você arrasta, só essa foto é esticada (fica leve mesmo com muita escrita) */
+let xfRaf = 0;
+function beginXform(){
+  S.hidden = new Set(S.sel); renderInk(); selBar.classList.add('hidden');
+  try {
+    clearLive(); const m = liveX.getTransform(), b = drawing.bb, pad = 30;
+    const x0 = b[0] - pad, y0 = b[1] - pad, w = b[2] - b[0] + pad * 2, h = b[3] - b[1] + pad * 2;
+    let f = 1; const pw = w * m.a, ph = h * m.d; if (Math.max(pw, ph) > 4096) f = 4096 / Math.max(pw, ph);
+    const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.ceil(pw * f)); cv.height = Math.max(1, Math.ceil(ph * f));
+    const c = cv.getContext('2d'); c.setTransform(m.a * f, 0, 0, m.d * f, -x0 * m.a * f, -y0 * m.d * f);
+    for (const it of S.sel) drawItem(c, it);
+    drawing.snap = { cv, x0, y0, w, h };
+  } catch (_) { drawing.snap = null; }
+  drawXform();
+}
+function scheduleXform(){ if (xfRaf) return; xfRaf = requestAnimationFrame(() => { xfRaf = 0; if (drawing && (drawing.kind === 'move' || drawing.kind === 'scale')) drawXform(); }); }
 function xformParams(d){
   d = d || drawing; const b = d.bb;
   if (d.kind === 'move') return [b[0], b[1], 1, d.lx - d.sx, d.ly - d.sy];
   const bw = Math.max(10, b[2] - b[0]), bh = Math.max(10, b[3] - b[1]);
+  if (d.axis === 'x') return [b[0], b[1], clamp((d.lx - b[0]) / bw, 0.1, 15), 0, 0, 1];
+  if (d.axis === 'y') return [b[0], b[1], 1, 0, 0, clamp((d.ly - b[1]) / bh, 0.1, 15)];
   const sc = clamp(Math.max((d.lx - b[0]) / bw, (d.ly - b[1]) / bh), 0.15, 12);
   return [b[0], b[1], sc, 0, 0];
 }
 function drawXform(){
-  const [ox, oy, sc, dx, dy] = xformParams();
+  const [ox, oy, sc, dx, dy, scy] = xformParams(), sy2 = scy == null ? sc : scy;
   clearLive();
-  for (const it of S.sel) drawItem(liveX, xform(it, ox, oy, sc, dx, dy));
-  const b = drawing.bb, [sx, sy] = pageToScreen(ox + (b[0] - 6 - ox) * sc + dx, oy + (b[1] - 6 - oy) * sc + dy), [ex, ey] = pageToScreen(ox + (b[2] + 6 - ox) * sc + dx, oy + (b[3] + 6 - oy) * sc + dy);
+  const sn = drawing.snap;
+  if (sn) liveX.drawImage(sn.cv, ox + (sn.x0 - ox) * sc + dx, oy + (sn.y0 - oy) * sy2 + dy, sn.w * sc, sn.h * sy2);
+  else for (const it of S.sel) drawItem(liveX, xform(it, ox, oy, sc, dx, dy, scy));
+  const b = drawing.bb, [sx, sy] = pageToScreen(ox + (b[0] - 6 - ox) * sc + dx, oy + (b[1] - 6 - oy) * sy2 + dy), [ex, ey] = pageToScreen(ox + (b[2] + 6 - ox) * sc + dx, oy + (b[3] + 6 - oy) * sy2 + dy);
   selBox.style.left = sx + 'px'; selBox.style.top = sy + 'px'; selBox.style.width = (ex - sx) + 'px'; selBox.style.height = (ey - sy) + 'px';
 }
 function toolTap(x, y, fromTouch){
@@ -3150,15 +3473,16 @@ function endInput(cancel){
       return;
     }
     if (d.kind === 'shape') {
-      if (cancel || Math.hypot(d.lx - d.sx, d.ly - d.sy) < 8) return;
+      if (cancel) return;
+      if (Math.hypot(d.lx - d.sx, d.ly - d.sy) < 8) { const hit = hitItem(d.sx, d.sy, false, false, 16); if (hit) setSel([hit]); return; }
       const st = { t: 'p', c: S.penColor, w: S.shapeW, k: 0, pts: shapePts(d.shape, d.sx, d.sy, d.lx, d.ly) };
-      pushUndo(S.items); S.items = S.items.concat([st]); drawItem(inkX, st); markDirty(); return;
+      pushUndo(S.items); S.items = S.items.concat([st]); drawItem(inkX, st); markDirty(); shapeHint(); return;
     }
     if (d.kind === 'move' || d.kind === 'scale') {
       S.hidden = null;
       if (cancel || (!d.moved && d.kind === 'move')) { renderInk(); positionOverlays(); buildSelBar(); return; }
-      const [ox, oy, sc, dx, dy] = xformParams(d);
-      replaceSel(it => xform(it, ox, oy, sc, dx, dy));
+      const [ox, oy, sc, dx, dy, scy] = xformParams(d);
+      replaceSel(it => xform(it, ox, oy, sc, dx, dy, scy));
       return;
     }
     if (d.kind === 'erase') {
@@ -3168,12 +3492,12 @@ function endInput(cancel){
     }
     if (cancel) return;
     // traço: toque curto em cima de figurinha/imagem/texto seleciona em vez de rabiscar
-    if (!d.moved && d.st.pts.length <= 15) { const obj = hitItem(d.sx, d.sy, true, true); if (obj) { setSel([obj]); return; } }
+    if (!d.moved && d.st.pts.length <= 15) { const obj = d.autoShape ? hitItem(d.sx, d.sy, false, false, 16) : hitItem(d.sx, d.sy, true, true); if (obj) { setSel([obj]); return; } }
     const P = d.st.pts, n = P.length / 3;
     if (!d.shaped && d.k && Math.hypot(d.rx - P[(n-1)*3], d.ry - P[(n-1)*3+1]) > 0.7) P.push(d.rx, d.ry, P[(n-1)*3+2]);
     // suavização: ao levantar a caneta, o traço é alisado conforme o ajuste "Suavização" da caneta
     if (!d.shaped && !d.autoShape && PEN_TYPES[d.st.t] && S.penCfg[d.st.t]) d.st.pts = smoothPts(d.st.pts, S.penCfg[d.st.t].suav / 100);
-    if (d.autoShape && !d.shaped) { const res = recognize(d.st.pts); if (res) d.st.pts = res; else toast('Não reconheci a forma. Ficou como desenho livre; desfaça para tentar de novo.', 2500); }
+    if (d.autoShape && !d.shaped) { const res = recognize(d.st.pts); if (res) { d.st.pts = res; shapeHint(); } else toast('Não reconheci a forma. Ficou como desenho livre; desfaça para tentar de novo.', 2500); }
     if (d.st.t === 'h' && !d.shaped) smartBand(d.st, S.hlStraight, S.hlFit, s => s.w * 2.4);
     if (d.st.t === 't') smartBand(d.st, S.tape.straight, S.tape.fit, tapeWidth);
     delete d.st.ws; delete d.st.bb; delete d.st._path;
@@ -3181,6 +3505,7 @@ function endInput(cancel){
     S.items = S.items.concat([d.st]);
     if (d.st.t === 'h' || d.st.t === 't') renderInk(); else drawItem(inkX, d.st);
     markDirty();
+    if (S.autoText && S.tool === 'pen' && !d.autoShape && !d.shaped && PEN_TYPES[d.st.t]) queueAutoText(d.st);
   } finally { flushPendingSnap(); }
 }
 function pushUndo(prev){ S.undo.push(prev); if (S.undo.length > 80) S.undo.shift(); S.redo = []; updateUndo(); }
@@ -3237,7 +3562,7 @@ vp.addEventListener('pointerdown', e => {
     if (touches.size === 1 && !drawing) {
       if (!viewMatches()) renderAll();
       const [x, y] = toPage(e.clientX, e.clientY);
-      const onHandle = e.target && e.target.id === 'selHandle';
+      const onHandle = e.target && /^selHandle/.test(e.target.id);
       if (S.sel.length && (onHandle || inSel(x, y))) { startInput(e); return; }   // arrastar figurinha/seleção com o dedo
       if (!S.penOnly && !['text','laser'].includes(S.tool) && !S.pad) { startInput(e); return; }
       beginGesture(); gesture.tap = true; return;
@@ -3302,6 +3627,7 @@ $('#menuBtn').onclick = () => {
   items.push('-');
   items.push({ text: 'Capa e nome do caderno', run: () => editNotebook(S.nb) });
   items.push({ text: 'Aparência do app', run: openAppearance });
+  items.push({ text: 'Tela cheia…', run: openFullscreenOptions });
   if (!S.nb.shared && mode === 'db') items.push({ text: 'Compartilhar para colaborar', run: () => shareNotebook(S.nb) });
   items.push({ text: 'Limpar esta página', danger: true, run: () => { if (!S.items.length) return; pushUndo(S.items); S.items = []; clearSel(); renderInk(); markDirty(); toast('Página limpa. Toque em desfazer se foi sem querer.'); } });
   items.push({ text: 'Excluir esta página', danger: true, run: () => deletePageAt(S.pageIdx) });

@@ -1,91 +1,18 @@
-CADERNO DIGITAL — SEU APP PRÓPRIO
-=================================
+ATUALIZAR O APP NO GITHUB (pelo tablet) - versão v5
 
-O que tem nesta pasta
----------------------
-index.html ............ o app inteiro (desenho, cadernos, planners, figurinhas, PDF...)
-manifest.json ......... nome, cores e ícones do app (é o que deixa ele "instalável")
-sw.js ................. faz o app abrir e funcionar sem internet
-icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png ... ícones do app
-.nojekyll ............. arquivo vazio de apoio para o GitHub (se não conseguir enviar, não tem problema)
+1. Extraia este zip no tablet (app Arquivos > segure o zip > Extrair).
+2. Abra github.com/AnnaZaqueu/AnnaZaqueu.github.io no Chrome.
+3. Toque em "Add file" > "Upload files".
+4. Envie estes 3 arquivos: index.html, sw.js e manifest.json
+   (eles substituem os antigos).
+5. Desça a página e toque em "Commit changes".
+6. Espere uns 2 minutos, abra o app, feche e abra de novo.
 
-Onde ficam suas anotações
--------------------------
-Nesta versão, tudo fica salvo DENTRO DO TABLET (não na conta do Claude).
-Por isso, de vez em quando: tela inicial do Caderno → botão ⋯ → "Fazer backup de todos os cadernos".
-O arquivo .json que baixar é sua cópia de segurança. Para trazer de volta: ⋯ → "Restaurar um backup".
-O app lembra você de fazer backup a cada 14 dias.
+O Chrome costuma atualizar o app instalado sozinho em 1 ou 2 dias.
+Se depois disso o app ainda não abrir sem as barras do Android,
+depois de atualizar: segure o ícone do Caderno > Desinstalar,
+abra annazaqueu.github.io no Chrome e instale de novo (⋮ > Instalar app).
+ANTES disso, faça um backup (menu ··· na tela inicial > Fazer backup),
+por segurança. Depois, se precisar, use "Restaurar um backup".
 
-Funciona aqui e não funciona aqui
----------------------------------
-Funciona: tudo de escrever e desenhar, canetas, formas, fita, marca-texto, texto, figurinhas,
-imagens, importar PDF, pastas, capas, planners, exportar PDF/PNG, escrita fácil, laser.
-Não funciona nesta versão: cadernos compartilhados (colaboração) e "converter em texto",
-porque esses dois dependem do Claude. Para eles, continue usando o Caderno pelo link do Claude.
-
-======================================================================
-PARTE 1 — COLOCAR O APP NA INTERNET (grátis, pelo tablet, uma vez só)
-======================================================================
-1. Descompacte o arquivo .zip
-   No app "Arquivos" do tablet, toque no .zip e escolha "Extrair".
-
-2. Crie uma conta no GitHub
-   Abra github.com no Chrome e toque em "Sign up". Anote seu nome de usuário.
-   Dica: no Chrome, toque em ⋮ e marque "Versão para computador" (Desktop site)
-   enquanto estiver no GitHub. Os botões ficam mais fáceis.
-
-3. Crie o repositório (a "pasta" do site)
-   Toque em "+" (canto de cima) → "New repository".
-   Em "Repository name", escreva exatamente:  SEUUSUARIO.github.io
-   (troque SEUUSUARIO pelo seu nome de usuário do GitHub).
-   Deixe "Public" marcado e toque em "Create repository".
-
-4. Envie os arquivos
-   Na página do repositório, toque em "uploading an existing file"
-   (ou "Add file" → "Upload files").
-   Selecione TODOS os arquivos da pasta extraída de uma vez:
-   index.html, manifest.json, sw.js, os 4 arquivos .png e o .nojekyll.
-   Espere terminar de carregar e toque em "Commit changes".
-
-5. Ligue o site
-   No repositório: "Settings" → "Pages" (no menu da esquerda).
-   Em "Build and deployment" → "Source", escolha "Deploy from a branch".
-   Em "Branch", escolha "main" e a pasta "/ (root)" e toque em "Save".
-   Espere alguns minutos (pode levar até 10).
-
-6. Abra seu app
-   No Chrome, entre em:  https://SEUUSUARIO.github.io
-   Deve aparecer a tela "Meus cadernos".
-
-======================================================================
-PARTE 2 — INSTALAR NO TABLET (o jeito mais fácil)
-======================================================================
-7. Com o site aberto no Chrome, toque em ⋮ → "Instalar app"
-   (em algumas versões: "Adicionar à tela inicial") → "Instalar".
-   Pronto: o Caderno aparece na gaveta de apps como qualquer outro app,
-   abre em tela cheia e funciona sem internet.
-
-======================================================================
-PARTE 3 (OPCIONAL) — GERAR O ARQUIVO .APK
-======================================================================
-Só se você quiser um arquivo .apk para guardar ou instalar em outro aparelho.
-8. Abra pwabuilder.com no Chrome, cole o endereço https://SEUUSUARIO.github.io
-   e toque em "Start".
-9. Toque em "Package for stores" → "Android" → "Generate package"
-   (pode deixar as opções como estão) → baixe o arquivo .zip.
-10. Dentro desse .zip há um arquivo .apk e um arquivo de "signing key"
-    (chave). GUARDE a chave: você vai precisar dela para atualizar o app depois.
-11. Para instalar o .apk: toque nele no app "Arquivos". Se o Android pedir,
-    permita "Instalar apps desconhecidos" para o app Arquivos.
-12. Se o app abrir com uma barrinha de endereço no topo: no mesmo .zip vem
-    um arquivo assetlinks.json. No GitHub, "Add file" → "Create new file",
-    escreva o nome  .well-known/assetlinks.json  , cole o conteúdo dele
-    e salve. Em alguns minutos a barrinha some.
-
-======================================================================
-ATUALIZAR O APP DEPOIS
-======================================================================
-Quando receber um index.html novo: no GitHub, abra o index.html → ícone de lápis
-(ou "Add file" → "Upload files" com o arquivo novo) → "Commit changes".
-No sw.js, troque  caderno-v1  por  caderno-v2  (v3, v4...) para o tablet baixar a versão nova.
-Seus cadernos NÃO são apagados ao atualizar.
+Suas anotações não são apagadas ao atualizar: elas ficam no tablet.

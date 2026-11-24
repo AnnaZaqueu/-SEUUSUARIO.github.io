@@ -4,7 +4,7 @@
   para ele abrir e funcionar mesmo sem internet.
   Ao publicar uma versão nova do index.html, aumente o número em VERSAO.
 */
-const VERSAO = 'caderno-v2';
+const VERSAO = 'caderno-v5';
 
 const ARQUIVOS_DO_APP = [
   './',
@@ -18,7 +18,7 @@ const BIBLIOTECAS = [
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-  'https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Caveat:wght@400;700&family=Lora:wght@400;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Caveat:wght@400;700&family=Lora:wght@400;700&family=Playwrite+BR:wght@300;400&family=Andika:wght@400;700&family=Dancing+Script:wght@400;700&family=Patrick+Hand&family=Merriweather:wght@400;700&family=Quicksand:wght@400;700&family=Pacifico&family=Special+Elite&display=swap'
 ];
 
 // Instalação: baixa e guarda tudo de uma vez
