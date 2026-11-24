@@ -69,6 +69,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .cover{position:relative;aspect-ratio:3/4;border-radius:5px 12px 12px 5px;border:0;padding:0;cursor:pointer;background:#ccc;
   box-shadow:0 1px 2px rgba(0,0,0,.12),0 6px 16px rgba(20,30,60,.14);overflow:hidden;text-align:left}
 .cover canvas{position:absolute;inset:0;width:100%;height:100%}
+.cover canvas.decos{pointer-events:none}
 .plate{position:absolute;left:26px;right:12px;top:20%;background:#fff;color:#1c2230;border-radius:6px;
   padding:8px 10px;font-weight:600;font-size:14px;line-height:1.25;word-break:break-word;box-shadow:0 1px 2px rgba(0,0,0,.12);
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
@@ -182,12 +183,23 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
 .covsw{width:32px;height:32px;border-radius:8px;border:2px solid transparent;background:var(--c);cursor:pointer}
 .covsw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
-.cov-layout{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}
+.cov-layout{display:grid;grid-template-columns:190px 1fr;gap:16px;align-items:start}
 @media (max-width:520px){ .cov-layout{grid-template-columns:1fr} .cov-layout .cover{width:150px} }
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
 .theme{border:2px solid transparent;border-radius:8px;padding:0;cursor:pointer;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:600;color:var(--muted)}
 .theme canvas{width:60px;height:44px;border-radius:6px}
 .theme[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.cov-opts{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.cov-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.dlg .cov-row label.l{margin:0;min-width:118px}
+.cov-row .val{flex:1;min-width:80px;color:var(--muted);font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cov-row .val canvas{width:34px;height:44px;border-radius:4px}
+.deco-chip{font-size:24px;width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.deco-chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.art-grid .theme canvas{width:96px;height:128px;border-radius:5px 10px 10px 5px}
+.art-grid .theme{font-size:13px}
+#covPrev{width:190px;touch-action:none;cursor:default}
 .emo-big{font-size:30px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .emo{font-size:22px;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .emo[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
@@ -460,6 +472,7 @@ const FONTS = {
 const fontsReady = (document.fonts && document.fonts.load) ? Promise.all(['300 40px "Playwrite BR"', '400 40px "Playwrite BR"', '400 40px "Andika"', '700 40px "Andika"', '400 40px "Dancing Script"', '700 40px "Dancing Script"', '400 40px "Patrick Hand"', '400 40px "Merriweather"', '700 40px "Merriweather"', '400 40px "Quicksand"', '700 40px "Quicksand"', '400 40px "Pacifico"', '400 40px "Special Elite"'].map(f => document.fonts.load(f).catch(() => {}))) : Promise.resolve();
 const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
 const STICKERS = {
+  'Enfeites': ['✨','🎀','💫','🌟','⭐','🌈','🦄','🍓','🍒','🌷','🌼','💐','🪐','🫧','🩷','🤍','💛','💚','💙','💜','🧸','🎈','🎉','🪄','🔖','📌','🏷️','🖇️','🪷','🍃','☁️','❄️','🌙','🐾','🍄','🌵','🌺','🍭','🧁','🍩','🎵','🎨','🕊️','🐚','🦢','🐞','🌱','💎'],
   'Estudo': ['⭐','✅','❗','❓','📌','📎','💡','📚','📝','✏️','📅','⏰','🎯','🏆','🔖','📊','🧠','⚠️','🔑','💯'],
   'Química': ['🧪','⚗️','🔬','🧫','🧬','⚛️','🔥','💧','🧊','🌡️','⚖️','🧲','💎','🌿','☢️','☣️','🥼','🥽','🧯','🫧'],
   'Reações': ['😀','😍','🥳','😎','🤓','🤔','😮','😴','😅','🥲','👍','👏','🙌','💪','🙏','👀','❤️','💜','💙','✨'],
@@ -719,7 +732,20 @@ function flowerPath(c, x, y, r, petal, center){
 const COVER_ARTS = [['', 'Nenhuma'], ['frasco', 'Erlenmeyer'], ['atomo', 'Átomo'], ['livros', 'Livros'], ['lapis', 'Lápis'], ['montanhas', 'Montanhas'],
   ['lua', 'Lua e estrelas'], ['cafe', 'Café'], ['planta', 'Plantinha'], ['arcoiris', 'Arco-íris'], ['borboleta', 'Borboleta'], ['coracao', 'Corações'],
   ['microscopio', 'Microscópio'], ['tubos', 'Tubos de ensaio'], ['molecula', 'Molécula'], ['dna', 'DNA'], ['tabela', 'Tabela periódica'], ['gato', 'Gatinho'],
-  ['sol', 'Sol e nuvem'], ['globo', 'Planeta'], ['musica', 'Música'], ['foguete', 'Foguete'], ['flores', 'Flores'], ['cadente', 'Estrela cadente']];
+  ['sol', 'Sol e nuvem'], ['globo', 'Planeta'], ['musica', 'Música'], ['foguete', 'Foguete'], ['flores', 'Flores'], ['cadente', 'Estrela cadente'],
+  ['bunsen', 'Bico de Bunsen'], ['balaofundo', 'Balão volumétrico'], ['lupa', 'Lupa'], ['formulas', 'Fórmulas'], ['livroaberto', 'Livro aberto'], ['calculadora', 'Calculadora'],
+  ['matematica', 'Matemática'], ['lampada', 'Ideia'], ['arvore', 'Árvore'], ['cacto', 'Cacto'], ['girassol', 'Girassol'], ['cogumelo', 'Cogumelo'],
+  ['onda', 'Mar'], ['folhas', 'Folhas'], ['baleia', 'Baleia'], ['abelha', 'Abelhinha'], ['coelho', 'Coelhinho'], ['nuvens', 'Nuvens e chuva'],
+  ['balaoar', 'Balão'], ['l_estudos', 'Letreiro "Estudos"'], ['l_quimica', 'Letreiro "Química"'], ['l_anot', 'Letreiro "Anotações"'], ['l_foco', 'Letreiro "Foco"'], ['l_sonhe', 'Letreiro "Sonhe alto"']];
+const ART_CATS = [
+  ['Ciências', ['frasco', 'balaofundo', 'tubos', 'bunsen', 'microscopio', 'lupa', 'atomo', 'molecula', 'dna', 'tabela', 'formulas']],
+  ['Estudo', ['livros', 'livroaberto', 'lapis', 'calculadora', 'matematica', 'lampada', 'musica']],
+  ['Natureza', ['flores', 'girassol', 'planta', 'cacto', 'arvore', 'folhas', 'cogumelo', 'montanhas', 'onda']],
+  ['Céu', ['sol', 'nuvens', 'lua', 'cadente', 'arcoiris', 'globo', 'foguete', 'balaoar']],
+  ['Fofos', ['gato', 'coelho', 'baleia', 'abelha', 'borboleta', 'coracao', 'cafe']],
+  ['Letreiros', ['l_estudos', 'l_quimica', 'l_anot', 'l_foco', 'l_sonhe']]
+];
+const artName = k => (COVER_ARTS.find(a => a[0] === k) || ['', 'Nenhuma'])[1];
 /* Ilustrações originais desenhadas em um quadro de 100 x 100, encaixadas na parte de baixo da capa */
 function drawArt(c, kind, w, h, col){
   if (!kind) return;
@@ -840,6 +866,104 @@ function drawArt(c, kind, w, h, col){
       for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; c.beginPath(); c.ellipse(x + Math.cos(a) * 9, y + Math.sin(a) * 9, 7, 7, 0, 0, 7); c.fillStyle = f; c.fill(); } circ(x, y, 6, Y); };
     fl(28, 40, P); fl(72, 34, V); fl(50, 22, '#f2a65a');
     c.beginPath(); c.ellipse(40, 80, 10, 5, -0.6, 0, 7); c.fillStyle = G; c.fill(); c.beginPath(); c.ellipse(60, 84, 10, 5, 0.6, 0, 7); c.fill();
+  } else if (kind === 'bunsen') {
+    c.beginPath(); c.rect(28, 86, 44, 8); fillStroke(soft); c.beginPath(); c.rect(44, 48, 12, 38); fillStroke(paperC);
+    c.beginPath(); c.moveTo(50, 6); c.bezierCurveTo(68, 24, 64, 46, 50, 46); c.bezierCurveTo(36, 46, 32, 24, 50, 6); fillStroke('#f2a65a');
+    c.beginPath(); c.moveTo(50, 22); c.bezierCurveTo(58, 32, 56, 43, 50, 43); c.bezierCurveTo(44, 43, 42, 32, 50, 22); c.fillStyle = B; c.fill();
+  } else if (kind === 'balaofundo') {
+    circ(50, 68, 26, paperC);
+    c.save(); c.beginPath(); c.arc(50, 68, 26, 0, Math.PI * 2); c.clip(); c.fillStyle = V; c.fillRect(0, 70, 100, 40); c.restore();
+    c.beginPath(); c.arc(50, 68, 26, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = paperC; c.fillRect(43, 8, 14, 38); c.beginPath(); c.moveTo(43, 8); c.lineTo(43, 44); c.moveTo(57, 8); c.lineTo(57, 44); c.moveTo(39, 8); c.lineTo(61, 8); c.stroke();
+    c.beginPath(); c.moveTo(43, 28); c.lineTo(57, 28); c.lineWidth = 2; c.stroke(); c.lineWidth = 3;
+    circ(42, 78, 3, '#fff', true); circ(56, 84, 2.4, '#fff', true); circ(50, 74, 2, '#fff', true);
+  } else if (kind === 'lupa') {
+    c.beginPath(); c.moveTo(60, 60); c.lineTo(88, 88); c.lineWidth = 11; c.stroke(); c.strokeStyle = soft; c.lineWidth = 6; c.stroke(); c.strokeStyle = ink; c.lineWidth = 3;
+    circ(42, 42, 26, 'rgba(124,196,240,.55)'); c.beginPath(); c.arc(42, 42, 17, Math.PI * 1.1, Math.PI * 1.5); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); c.strokeStyle = ink;
+  } else if (kind === 'formulas' || kind === 'matematica') {
+    const items = kind === 'formulas' ? [['H₂O', 10, 34, 30, B, -0.12], ['CO₂', 52, 30, 26, G, 0.1], ['NaCl', 14, 70, 26, P, 0.06], ['pH 7', 56, 76, 24, Y, -0.08], ['⇌', 44, 54, 22, V, 0]]
+                                      : [['π', 12, 36, 40, P, -0.1], ['√x', 50, 32, 30, B, 0.08], ['∑', 12, 82, 36, G, 0.05], ['x²', 56, 78, 32, Y, -0.08], ['=', 40, 58, 26, V, 0]];
+    for (const [t, x, y, fs, f, rot] of items) { c.save(); c.translate(x, y); c.rotate(rot); c.font = '700 ' + fs + 'px "Caveat", cursive'; c.fillStyle = ink === '#ffffff' ? '#fff' : '#2a2f3a'; c.fillText(t, 1.5, 1.5); c.fillStyle = f; c.fillText(t, 0, 0); c.restore(); }
+  } else if (kind === 'livroaberto') {
+    c.beginPath(); c.moveTo(50, 34); c.quadraticCurveTo(30, 24, 6, 30); c.lineTo(6, 84); c.quadraticCurveTo(30, 78, 50, 88); c.closePath(); fillStroke(paperC);
+    c.beginPath(); c.moveTo(50, 34); c.quadraticCurveTo(70, 24, 94, 30); c.lineTo(94, 84); c.quadraticCurveTo(70, 78, 50, 88); c.closePath(); fillStroke(paperC);
+    c.strokeStyle = B; c.lineWidth = 2; for (let i = 0; i < 4; i++) { const y = 44 + i * 9; c.beginPath(); c.moveTo(14, y - 2); c.quadraticCurveTo(30, y - 6, 42, y); c.moveTo(58, y); c.quadraticCurveTo(70, y - 6, 86, y - 2); c.stroke(); }
+    c.strokeStyle = ink; c.lineWidth = 3; c.fillStyle = P; heartPath(c, 72, 16, 12);
+  } else if (kind === 'calculadora') {
+    c.beginPath(); c.roundRect ? c.roundRect(24, 8, 52, 88, 8) : c.rect(24, 8, 52, 88); fillStroke(paperC);
+    c.beginPath(); c.rect(31, 15, 38, 16); fillStroke(B);
+    const cols = [soft, soft, P, soft, soft, Y, soft, soft, G];
+    for (let i = 0; i < 9; i++) { const x = 31 + (i % 3) * 13.5, y = 38 + Math.floor(i / 3) * 17; c.beginPath(); c.rect(x, y, 10, 12); c.fillStyle = cols[i]; c.fill(); c.lineWidth = 1.6; c.stroke(); } c.lineWidth = 3;
+  } else if (kind === 'lampada') {
+    for (let i = 0; i < 7; i++) { const a = Math.PI + i * Math.PI / 6; c.beginPath(); c.moveTo(50 + Math.cos(a) * 32, 40 + Math.sin(a) * 32); c.lineTo(50 + Math.cos(a) * 42, 40 + Math.sin(a) * 42); c.strokeStyle = Y; c.lineWidth = 4; c.stroke(); }
+    c.strokeStyle = ink; c.lineWidth = 3;
+    c.beginPath(); c.arc(50, 40, 24, Math.PI * 0.8, Math.PI * 2.2); c.lineTo(60, 70); c.lineTo(40, 70); c.closePath(); fillStroke(Y);
+    c.beginPath(); c.rect(40, 70, 20, 16); fillStroke(soft); c.beginPath(); c.moveTo(40, 76); c.lineTo(60, 76); c.moveTo(40, 81); c.lineTo(60, 81); c.lineWidth = 2; c.stroke(); c.lineWidth = 3;
+    c.beginPath(); c.moveTo(44, 62); c.lineTo(47, 46); c.lineTo(53, 46); c.lineTo(56, 62); c.strokeStyle = '#c98a1b'; c.lineWidth = 2; c.stroke(); c.strokeStyle = ink; c.lineWidth = 3;
+  } else if (kind === 'arvore') {
+    c.beginPath(); c.rect(44, 60, 12, 34); fillStroke('#b07a4f');
+    circ(34, 46, 20, G); circ(66, 46, 20, G); circ(50, 28, 24, G); c.fillStyle = '#4fae74'; for (const [x, y] of [[40, 30], [58, 42], [36, 52], [64, 26]]) { c.beginPath(); c.arc(x, y, 4, 0, 7); c.fill(); }
+    circ(30, 40, 4, '#e8505b', true); circ(62, 52, 4, '#e8505b', true); circ(52, 20, 4, '#e8505b', true);
+  } else if (kind === 'cacto') {
+    c.beginPath(); c.moveTo(30, 74); c.lineTo(70, 74); c.lineTo(64, 96); c.lineTo(36, 96); c.closePath(); fillStroke(P);
+    c.beginPath(); c.moveTo(40, 74); c.lineTo(40, 22); c.arc(50, 22, 10, Math.PI, 0); c.lineTo(60, 74); fillStroke(G);
+    c.beginPath(); c.moveTo(40, 54); c.lineTo(28, 54); c.lineTo(28, 38); c.arc(24, 38, 4, 0, Math.PI, true); c.lineTo(20, 58); c.quadraticCurveTo(20, 62, 26, 62); c.lineTo(40, 62); fillStroke(G);
+    c.beginPath(); c.moveTo(60, 46); c.lineTo(72, 46); c.lineTo(72, 32); c.arc(76, 32, 4, Math.PI, 0); c.lineTo(80, 50); c.quadraticCurveTo(80, 54, 74, 54); c.lineTo(60, 54); fillStroke(G);
+    c.fillStyle = '#f28fad'; flowerPath(c, 50, 12, 7, P, Y);
+  } else if (kind === 'girassol') {
+    c.beginPath(); c.moveTo(50, 50); c.lineTo(50, 98); c.strokeStyle = '#4fae74'; c.lineWidth = 5; c.stroke(); c.lineWidth = 3; c.strokeStyle = ink;
+    c.beginPath(); c.ellipse(38, 78, 11, 5, -0.6, 0, 7); c.fillStyle = G; c.fill(); c.beginPath(); c.ellipse(62, 72, 11, 5, 0.6, 0, 7); c.fill();
+    for (let i = 0; i < 14; i++) { const a = i * Math.PI / 7; c.beginPath(); c.ellipse(50 + Math.cos(a) * 20, 34 + Math.sin(a) * 20, 10, 5, a, 0, 7); c.fillStyle = Y; c.fill(); c.lineWidth = 1.5; c.stroke(); }
+    c.lineWidth = 3; circ(50, 34, 13, '#8a5a35'); c.fillStyle = '#5e3b22'; for (let i = 0; i < 8; i++) { c.beginPath(); c.arc(50 + Math.cos(i) * 6, 34 + Math.sin(i * 1.7) * 6, 1.6, 0, 7); c.fill(); }
+  } else if (kind === 'cogumelo') {
+    c.beginPath(); c.moveTo(40, 56); c.quadraticCurveTo(36, 92, 44, 94); c.lineTo(58, 94); c.quadraticCurveTo(66, 92, 60, 56); c.closePath(); fillStroke(paperC);
+    c.beginPath(); c.moveTo(12, 58); c.bezierCurveTo(12, 14, 88, 14, 88, 58); c.closePath(); fillStroke('#e8505b');
+    for (const [x, y, r] of [[34, 38, 6], [56, 30, 5], [70, 46, 5], [46, 50, 4], [22, 50, 3.5]]) circ(x, y, r, '#fff', true);
+    c.beginPath(); c.ellipse(80, 90, 9, 4, 0, 0, 7); c.fillStyle = G; c.fill();
+  } else if (kind === 'onda') {
+    c.beginPath(); c.moveTo(0, 96); c.lineTo(0, 60); c.bezierCurveTo(10, 40, 40, 30, 56, 44); c.bezierCurveTo(44, 46, 42, 60, 56, 64); c.bezierCurveTo(70, 68, 86, 56, 100, 50); c.lineTo(100, 96); c.closePath(); fillStroke(B);
+    c.beginPath(); c.moveTo(0, 80); c.bezierCurveTo(25, 70, 50, 90, 100, 76); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); c.strokeStyle = ink;
+    circ(80, 22, 11, Y); c.fillStyle = ink === '#ffffff' ? '#fff' : '#2a2f3a'; c.beginPath(); c.moveTo(20, 20); c.quadraticCurveTo(24, 16, 28, 20); c.quadraticCurveTo(32, 16, 36, 20); c.lineWidth = 2; c.stroke(); c.lineWidth = 3;
+  } else if (kind === 'folhas') {
+    const leaf = (x, y, a, f, L) => { c.save(); c.translate(x, y); c.rotate(a); c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(L * 0.5, -L * 0.35, L, 0); c.quadraticCurveTo(L * 0.5, L * 0.35, 0, 0); fillStroke(f); c.beginPath(); c.moveTo(2, 0); c.lineTo(L - 4, 0); c.lineWidth = 1.6; c.stroke(); c.lineWidth = 3; c.restore(); };
+    leaf(50, 94, -1.9, G, 50); leaf(50, 94, -1.2, '#4fae74', 46); leaf(50, 94, -2.6, '#8fd19e', 44); leaf(50, 94, -0.6, G, 38); leaf(50, 94, -3.2, '#4fae74', 36);
+  } else if (kind === 'baleia') {
+    c.beginPath(); c.moveTo(10, 66); c.bezierCurveTo(10, 36, 64, 34, 74, 58); c.quadraticCurveTo(84, 52, 92, 40); c.quadraticCurveTo(94, 56, 84, 66); c.quadraticCurveTo(92, 74, 94, 84); c.quadraticCurveTo(82, 78, 74, 72); c.bezierCurveTo(60, 92, 10, 92, 10, 66); fillStroke(B);
+    c.beginPath(); c.moveTo(14, 72); c.quadraticCurveTo(40, 84, 66, 74); c.strokeStyle = '#fff'; c.lineWidth = 2.4; c.stroke(); c.strokeStyle = ink; c.lineWidth = 3;
+    c.fillStyle = '#2a2f3a'; c.beginPath(); c.arc(28, 60, 3, 0, 7); c.fill(); circ(20, 68, 4, 'rgba(242,143,173,.7)', true);
+    c.strokeStyle = B; c.lineWidth = 3; c.beginPath(); c.moveTo(40, 40); c.quadraticCurveTo(38, 26, 30, 20); c.moveTo(40, 40); c.quadraticCurveTo(42, 24, 50, 18); c.stroke(); c.strokeStyle = ink;
+  } else if (kind === 'abelha') {
+    c.setLineDash([4, 5]); c.beginPath(); c.moveTo(8, 86); c.bezierCurveTo(20, 60, 34, 96, 40, 66); c.lineWidth = 2; c.stroke(); c.setLineDash([]); c.lineWidth = 3;
+    c.beginPath(); c.ellipse(46, 28, 12, 16, -0.5, 0, 7); fillStroke('rgba(255,255,255,.85)'); c.beginPath(); c.ellipse(64, 26, 12, 16, 0.5, 0, 7); fillStroke('rgba(255,255,255,.85)');
+    c.beginPath(); c.ellipse(58, 56, 26, 18, 0, 0, 7); fillStroke(Y);
+    c.save(); c.beginPath(); c.ellipse(58, 56, 26, 18, 0, 0, 7); c.clip(); c.fillStyle = '#2a2f3a'; c.fillRect(48, 30, 7, 50); c.fillRect(63, 30, 7, 50); c.restore();
+    c.beginPath(); c.ellipse(58, 56, 26, 18, 0, 0, 7); c.stroke(); c.fillStyle = '#2a2f3a'; c.beginPath(); c.arc(78, 52, 2.6, 0, 7); c.fill();
+    c.beginPath(); c.moveTo(32, 56); c.lineTo(24, 58); c.lineTo(32, 61); c.fill();
+  } else if (kind === 'coelho') {
+    c.beginPath(); c.ellipse(38, 30, 8, 24, -0.15, 0, 7); fillStroke(paperC); c.beginPath(); c.ellipse(62, 30, 8, 24, 0.15, 0, 7); fillStroke(paperC);
+    c.beginPath(); c.ellipse(38, 32, 4, 16, -0.15, 0, 7); c.fillStyle = P; c.fill(); c.beginPath(); c.ellipse(62, 32, 4, 16, 0.15, 0, 7); c.fill();
+    c.beginPath(); c.ellipse(50, 68, 28, 24, 0, 0, 7); fillStroke(paperC);
+    c.fillStyle = '#2a2f3a'; c.beginPath(); c.arc(40, 64, 3.4, 0, 7); c.fill(); c.beginPath(); c.arc(60, 64, 3.4, 0, 7); c.fill();
+    c.fillStyle = P; c.beginPath(); c.moveTo(46, 72); c.lineTo(54, 72); c.lineTo(50, 76); c.closePath(); c.fill(); circ(32, 74, 5, 'rgba(242,143,173,.55)', true); circ(68, 74, 5, 'rgba(242,143,173,.55)', true);
+  } else if (kind === 'nuvens') {
+    const cloud = (x, y, k2, f) => { c.beginPath(); c.arc(x - 12 * k2, y, 10 * k2, Math.PI * 0.5, Math.PI * 1.5); c.arc(x, y - 8 * k2, 13 * k2, Math.PI, 0); c.arc(x + 14 * k2, y, 10 * k2, Math.PI * 1.5, Math.PI * 0.5); c.closePath(); fillStroke(f); };
+    circ(74, 22, 12, Y); cloud(36, 40, 1.4, '#fff'); cloud(70, 52, 1, '#eef3fb');
+    c.strokeStyle = B; c.lineWidth = 3.5; for (const [x, y] of [[22, 64], [36, 72], [50, 64], [30, 86], [46, 90], [64, 76]]) { c.beginPath(); c.moveTo(x, y); c.lineTo(x - 3, y + 8); c.stroke(); } c.strokeStyle = ink; c.lineWidth = 3;
+  } else if (kind === 'balaoar') {
+    c.beginPath(); c.moveTo(50, 8); c.bezierCurveTo(84, 8, 82, 48, 58, 62); c.lineTo(42, 62); c.bezierCurveTo(18, 48, 16, 8, 50, 8); c.closePath(); fillStroke(P);
+    c.save(); c.clip(); c.fillStyle = Y; c.beginPath(); c.ellipse(50, 34, 10, 30, 0, 0, 7); c.fill(); c.fillStyle = B; c.beginPath(); c.ellipse(26, 34, 6, 30, 0, 0, 7); c.fill(); c.beginPath(); c.ellipse(74, 34, 6, 30, 0, 0, 7); c.fill(); c.restore();
+    c.beginPath(); c.moveTo(50, 8); c.bezierCurveTo(84, 8, 82, 48, 58, 62); c.lineTo(42, 62); c.bezierCurveTo(18, 48, 16, 8, 50, 8); c.stroke();
+    c.beginPath(); c.moveTo(43, 62); c.lineTo(42, 76); c.moveTo(57, 62); c.lineTo(58, 76); c.lineWidth = 2; c.stroke(); c.lineWidth = 3;
+    c.beginPath(); c.rect(40, 76, 20, 14); fillStroke('#b07a4f');
+  } else if (kind.startsWith('l_')) {
+    const txt = { l_estudos: 'Estudos', l_quimica: 'Química', l_anot: 'Anotações', l_foco: 'Foco!', l_sonhe: 'Sonhe alto' }[kind] || '';
+    const fam = kind === 'l_foco' || kind === 'l_sonhe' ? '"Pacifico", "Caveat", cursive' : '700 1px "Caveat", cursive';
+    c.font = (fam.startsWith('700') ? '700 40px "Caveat", cursive' : '40px ' + fam); const tw = c.measureText(txt).width, fs = Math.min(44, 40 * 92 / tw);
+    c.font = (fam.startsWith('700') ? '700 ' + fs + 'px "Caveat", cursive' : fs + 'px ' + fam); c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    c.fillStyle = light ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.25)'; c.fillText(txt, 51.5, 63.5);
+    c.fillStyle = ink === '#ffffff' ? '#fff' : '#2a2f3a'; c.fillText(txt, 50, 62);
+    c.beginPath(); c.moveTo(14, 74); c.bezierCurveTo(36, 66, 64, 82, 86, 70); c.strokeStyle = P; c.lineWidth = 4; c.stroke(); c.strokeStyle = ink; c.lineWidth = 3;
+    c.fillStyle = Y; starPath(c, 12, 30, 7); c.fillStyle = B; starPath(c, 88, 26, 5); c.fillStyle = P; heartPath(c, 84, 84, 9);
   } else if (kind === 'cadente') {
     [[P, 0], [B, 10], [V, 20]].forEach(([f, o]) => { c.beginPath(); c.moveTo(56 - o * 0.3, 44 + o * 0.7); c.lineTo(8 + o * 0.4, 86 - o * 0.2); c.strokeStyle = f; c.lineWidth = 5; c.stroke(); });
     c.strokeStyle = ink; c.lineWidth = 3; c.fillStyle = Y; starPath(c, 66, 34, 26); c.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? 26 * 0.45 : 26; c.lineTo(66 + rr * Math.cos(a), 34 + rr * Math.sin(a)); } c.closePath(); c.stroke();
@@ -896,6 +1020,9 @@ function drawCover(cv, cover, dpr, retried){
     c.fillStyle = 'rgba(0,0,0,.2)'; c.fillRect(0, 0, 14, h); c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(14, 0, 2, h);
   }
   if (cover.emoji) { c.font = Math.round(w * 0.22) + 'px ' + EMOJI_FONT; c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillText(cover.emoji, w - 10, h - 8); }
+  let dc = c; const layer = cv.parentNode && cv.parentNode.querySelector && cv.parentNode.querySelector('canvas.decos');
+  if (layer && layer !== cv) { layer.width = cv.width; layer.height = cv.height; dc = layer.getContext('2d'); dc.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  for (const d of cover.decos || []) { const c = dc; c.save(); c.translate(d.x * w, d.y * h); if (d.r) c.rotate(d.r); c.font = Math.round(d.s * w) + 'px ' + EMOJI_FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(d.e, 0, d.s * w * 0.06); c.restore(); }
 }
 const coverOf = nb => nb.cover || { color: nb.color || '#2e5bd0', theme: 'liso', style: 'dura', emoji: '' };
 
@@ -1536,6 +1663,7 @@ function renderHome(){
     const cover = document.createElement('button'); cover.type = 'button'; cover.className = 'cover'; cover.setAttribute('aria-label', 'Abrir ' + nb.name);
     const cv = document.createElement('canvas'); cover.appendChild(cv);
     const plate = document.createElement('div'); plate.className = 'plate'; plate.textContent = nb.name; cover.appendChild(plate);
+    const dl = document.createElement('canvas'); dl.className = 'decos'; cover.appendChild(dl);
     if (nb.shared) { const b = document.createElement('div'); b.className = 'badge'; b.textContent = 'Compartilhado'; cover.appendChild(b); }
     cover.onclick = () => openNotebook(nb.id);
     const meta = document.createElement('div'); meta.className = 'nb-meta';
@@ -1568,23 +1696,62 @@ function coverDialog(nb, presetName){
   return openDialog((box, close) => {
     box.innerHTML = `<h3>${editing ? 'Capa e nome do caderno' : 'Novo caderno'}</h3>
       <div class="cov-layout">
-        <div class="cover" style="cursor:default"><canvas></canvas><div class="plate"></div></div>
+        <div><div class="cover" id="covPrev"><canvas></canvas><div class="plate" style="pointer-events:none"></div><canvas class="decos"></canvas></div><p class="panel-note" id="decoHint" style="margin:6px 0 0;font-size:12px">Arraste os enfeites na capa para mudar de lugar.</p></div>
         <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
           <div><label class="l" for="nbName">Nome</label><input type="text" id="nbName" maxlength="60" placeholder="Ex.: Química Qualitativa"></div>
           <div><label class="l">Tipo de caderno</label><div class="row" id="styRow"></div></div>
           <div><label class="l">Cor</label><div class="row" id="colRow"></div></div>
         </div>
       </div>
-      <div><label class="l">Tema da capa</label><div class="theme-grid" id="thRow"></div></div>
-      <div><label class="l">Ilustração</label><div class="theme-grid" id="artRow"></div></div>
-      <div><label class="l">Figurinha grande na capa</label><div class="row"><button type="button" class="chip" id="stkPick">Escolher figurinha</button><span id="stkNow" class="emo-big"></span><button type="button" class="chip" id="stkDel">Tirar figurinha</button></div></div>
-      <div><label class="l">Foto de capa</label><div class="row"><button type="button" class="chip" id="photoBtn">Escolher foto da galeria</button><button type="button" class="chip" id="photoDel">Remover foto</button><input type="file" accept="image/*" id="photoIn" class="hidden"></div></div>
-      <div><label class="l">Enfeite</label><div class="row" id="emRow"></div></div>
-      <div><label class="l">${editing ? 'Modelo para novas páginas' : 'Modelo das folhas'}</label><div class="row"><button type="button" class="chip" id="tplBtn"></button></div></div>
+      <div class="cov-opts">
+        <div class="cov-row"><label class="l">Tema da capa</label><span class="val" id="thVal"></span><button type="button" class="chip" id="thPick">Trocar ▸</button></div>
+        <div class="cov-row"><label class="l">Ilustração</label><span class="val" id="artVal"></span><button type="button" class="chip" id="artPick">Escolher ▸</button><button type="button" class="chip" id="artDel">Tirar</button></div>
+        <div class="cov-row"><label class="l">Figurinha grande</label><span class="val"><span id="stkNow" class="emo-big"></span></span><button type="button" class="chip" id="stkPick">Escolher ▸</button><button type="button" class="chip" id="stkDel">Tirar</button></div>
+        <div class="cov-row"><label class="l">Foto de capa</label><span class="val" id="photoVal"></span><button type="button" class="chip" id="photoBtn">Escolher foto ▸</button><button type="button" class="chip" id="photoDel">Tirar</button><input type="file" accept="image/*" id="photoIn" class="hidden"></div>
+        <div class="cov-row"><label class="l">Enfeites</label><span class="val" id="decoList"></span><button type="button" class="chip" id="decoAdd">+ Adicionar ▸</button>
+          <div id="decoEdit" class="row hidden" style="width:100%;padding-top:4px"><span style="font-weight:600;font-size:13px;color:var(--muted)">Enfeite escolhido:</span><button type="button" class="chip" id="decoMinus">Menor</button><button type="button" class="chip" id="decoPlus">Maior</button><button type="button" class="chip" id="decoRot">Girar</button><button type="button" class="chip" id="decoDel">Tirar</button></div></div>
+        <div class="cov-row"><label class="l">${editing ? 'Modelo das páginas novas' : 'Modelo das folhas'}</label><span class="val"></span><button type="button" class="chip" id="tplBtn"></button></div>
+      </div>
       <div class="actions"><button class="btn" type="button" data-a="no">Cancelar</button><button class="btn primary" type="button" data-a="ok">${editing ? 'Salvar' : 'Criar caderno'}</button></div>`;
-    const prevCv = box.querySelector('.cover canvas'), plate = box.querySelector('.plate'), inp = box.querySelector('#nbName');
+    const prevCv = box.querySelector('.cover canvas:not(.decos)'), plate = box.querySelector('.plate'), inp = box.querySelector('#nbName');
     inp.value = nb ? nb.name : (presetName || '');
-    const redraw = () => { plate.textContent = inp.value || 'Meu caderno'; drawCover(prevCv, cover); };
+    if (cover.emoji) { cover.decos = (cover.decos || []).concat([{ e: cover.emoji, x: 0.8, y: 0.87, s: 0.22 }]); cover.emoji = ''; }
+    cover.decos = (cover.decos || []).map(d => Object.assign({}, d));
+    let selDeco = -1;
+    const redraw = () => {
+      plate.textContent = inp.value || 'Meu caderno'; drawCover(prevCv, cover);
+      const d = cover.decos[selDeco];
+      if (d) { const r = prevCv.getBoundingClientRect(), c = box.querySelector('#covPrev canvas.decos').getContext('2d'); c.save(); c.setLineDash([5, 4]); c.strokeStyle = '#fff'; c.lineWidth = 2; c.shadowColor = 'rgba(0,0,0,.5)'; c.shadowBlur = 3; c.beginPath(); c.arc(d.x * r.width, d.y * r.height, d.s * r.width * 0.62, 0, Math.PI * 2); c.stroke(); c.restore(); }
+      syncDecos();
+    };
+    const decoList = box.querySelector('#decoList'), decoEdit = box.querySelector('#decoEdit');
+    const syncDecos = () => {
+      decoList.innerHTML = '';
+      if (!cover.decos.length) decoList.textContent = 'Nenhum';
+      cover.decos.forEach((d, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'deco-chip'; b.textContent = d.e; b.setAttribute('aria-pressed', i === selDeco); b.onclick = () => { selDeco = i === selDeco ? -1 : i; redraw(); }; decoList.appendChild(b); });
+      decoEdit.classList.toggle('hidden', selDeco < 0);
+      box.querySelector('#decoHint').classList.toggle('hidden', !cover.decos.length);
+    };
+    box.querySelector('#decoAdd').onclick = async () => {
+      const e = await pickSticker('Enfeite da capa', 'Enfeites'); if (!e) return;
+      const n = cover.decos.length; cover.decos.push({ e, x: [0.78, 0.3, 0.78, 0.3, 0.55][n % 5], y: [0.88, 0.88, 0.1, 0.1, 0.5][n % 5], s: 0.2 });
+      selDeco = cover.decos.length - 1; redraw();
+    };
+    const editSel = fn => { const d = cover.decos[selDeco]; if (d) { fn(d); redraw(); } };
+    box.querySelector('#decoMinus').onclick = () => editSel(d => d.s = Math.max(0.07, d.s / 1.2));
+    box.querySelector('#decoPlus').onclick = () => editSel(d => d.s = Math.min(0.7, d.s * 1.2));
+    box.querySelector('#decoRot').onclick = () => editSel(d => d.r = (((d.r || 0) + Math.PI / 8) % (Math.PI * 2)));
+    box.querySelector('#decoDel').onclick = () => { if (selDeco >= 0) { cover.decos.splice(selDeco, 1); selDeco = -1; redraw(); } };
+    // arrastar os enfeites na própria capa
+    const prevBox = box.querySelector('#covPrev'); let dragD = null;
+    prevBox.addEventListener('pointerdown', e => {
+      const r = prevCv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      let hit = -1; for (let i = cover.decos.length - 1; i >= 0; i--) { const d = cover.decos[i], rr = d.s * 0.62; if (Math.hypot((x - d.x), (y - d.y) * r.height / r.width) < rr) { hit = i; break; } }
+      selDeco = hit; if (hit >= 0) { dragD = { d: cover.decos[hit], ox: x - cover.decos[hit].x, oy: y - cover.decos[hit].y }; try { prevBox.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); }
+      redraw();
+    });
+    prevBox.addEventListener('pointermove', e => { if (!dragD) return; const r = prevCv.getBoundingClientRect(); dragD.d.x = clamp((e.clientX - r.left) / r.width - dragD.ox, 0.02, 0.98); dragD.d.y = clamp((e.clientY - r.top) / r.height - dragD.oy, 0.02, 0.98); redraw(); });
+    const endDrag = () => { dragD = null; }; prevBox.addEventListener('pointerup', endDrag); prevBox.addEventListener('pointercancel', endDrag);
     inp.oninput = redraw;
     const styRow = box.querySelector('#styRow');
     [['dura', 'Capa dura'], ['espiral', 'Espiral']].forEach(([k, l]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = l; b.setAttribute('aria-pressed', cover.style === k); b.onclick = () => { cover.style = k; styRow.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === b)); redraw(); }; styRow.appendChild(b); });
@@ -1593,26 +1760,45 @@ function coverDialog(nb, presetName){
     const cw = document.createElement('label'); cw.className = 'custom'; cw.style.width = cw.style.height = '32px'; cw.title = 'Outra cor';
     const ci = document.createElement('input'); ci.type = 'color'; ci.value = cover.color; ci.setAttribute('aria-label', 'Outra cor'); ci.oninput = () => { cover.color = ci.value; colRow.querySelectorAll('.covsw').forEach(x => x.setAttribute('aria-pressed', 'false')); redraw(); drawThemes(); };
     cw.appendChild(ci); colRow.appendChild(cw);
-    const thRow = box.querySelector('#thRow');
+    const thVal = box.querySelector('#thVal'), artVal = box.querySelector('#artVal');
+    const mini = (extra) => { const c = document.createElement('canvas'); requestAnimationFrame(() => drawCover(c, Object.assign({}, cover, { decos: [], emoji: '', style: 'none', photoId: null, sticker: '' }, extra))); return c; };
     const drawThemes = () => {
-      thRow.querySelectorAll('canvas').forEach(c => drawCover(c, Object.assign({}, cover, { theme: c.dataset.k, emoji: '', style: 'none', art: '', photoId: null })));
-      box.querySelectorAll('#artRow canvas').forEach(c => drawCover(c, Object.assign({}, cover, { art: c.dataset.k, emoji: '', style: 'none', photoId: null })));
+      thVal.innerHTML = ''; thVal.appendChild(mini({ art: '' })); thVal.append((COVER_THEMES.find(t => t[0] === (cover.theme || 'liso')) || ['', 'Lisa'])[1]);
+      artVal.innerHTML = ''; if (cover.art) artVal.appendChild(mini({ theme: cover.theme })); artVal.append(cover.art ? artName(cover.art) : 'Nenhuma');
+      box.querySelector('#artDel').classList.toggle('hidden', !cover.art);
     };
-    COVER_THEMES.forEach(([k, l]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'theme'; b.setAttribute('aria-pressed', cover.theme === k); const c = document.createElement('canvas'); c.dataset.k = k; b.appendChild(c); b.append(l); b.onclick = () => { cover.theme = k; thRow.querySelectorAll('.theme').forEach(x => x.setAttribute('aria-pressed', x === b)); redraw(); }; thRow.appendChild(b); });
-    const artRow = box.querySelector('#artRow');
-    COVER_ARTS.forEach(([k, l]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'theme'; b.setAttribute('aria-pressed', (cover.art || '') === k); const c = document.createElement('canvas'); c.dataset.k = k; c.style.height = '64px'; b.appendChild(c); b.append(l);
-      b.onclick = () => { cover.art = k; if (k) { delete cover.photoId; delete cover.sticker; syncPhoto(); syncStk(); } artRow.querySelectorAll('.theme').forEach(x => x.setAttribute('aria-pressed', x === b)); redraw(); }; artRow.appendChild(b); });
+    const gridSheet = (title, tabs, cur, onPick, makeCover) => {
+      let tab = Math.max(0, tabs.findIndex(([, keys]) => keys.includes(cur)));
+      openSheet(title, body => {
+        const draw = () => {
+          body.innerHTML = '';
+          if (tabs.length > 1) { const tb = document.createElement('div'); tb.className = 'tabs'; tabs.forEach(([name], i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = name; b.setAttribute('aria-pressed', i === tab); b.onclick = () => { tab = i; draw(); }; tb.appendChild(b); }); body.appendChild(tb); }
+          const grid = document.createElement('div'); grid.className = 'art-grid'; body.appendChild(grid);
+          for (const [k, label] of tabs[tab][1].map(k => [k, makeCover.label(k)])) {
+            const b = document.createElement('button'); b.type = 'button'; b.className = 'theme'; b.setAttribute('aria-pressed', k === cur);
+            const c = document.createElement('canvas'); b.appendChild(c); b.append(label);
+            b.onclick = () => { closeSheet(); onPick(k); }; grid.appendChild(b);
+            requestAnimationFrame(() => drawCover(c, makeCover.cover(k)));
+          }
+        };
+        draw();
+      });
+    };
+    box.querySelector('#thPick').onclick = () => gridSheet('Tema da capa', [['Temas', COVER_THEMES.map(t => t[0])]], cover.theme || 'liso', k => { cover.theme = k; redraw(); drawThemes(); },
+      { label: k => COVER_THEMES.find(t => t[0] === k)[1], cover: k => Object.assign({}, cover, { theme: k, decos: [], emoji: '', style: 'dura', art: '', photoId: null, sticker: '' }) });
+    box.querySelector('#artPick').onclick = () => gridSheet('Ilustração da capa', ART_CATS, cover.art || '', k => { cover.art = k; delete cover.photoId; delete cover.sticker; syncPhoto(); syncStk(); redraw(); drawThemes(); },
+      { label: artName, cover: k => Object.assign({}, cover, { art: k, decos: [], emoji: '', style: 'dura', photoId: null, sticker: '' }) });
+    box.querySelector('#artDel').onclick = () => { cover.art = ''; redraw(); drawThemes(); };
     const stkNow = box.querySelector('#stkNow'), stkDel = box.querySelector('#stkDel');
-    const syncStk = () => { stkNow.textContent = cover.sticker || ''; stkDel.classList.toggle('hidden', !cover.sticker); };
+    const syncStk = () => { stkNow.textContent = cover.sticker || ''; if (!cover.sticker) stkNow.innerHTML = '<span style="font-size:14px">Nenhuma</span>'; stkDel.classList.toggle('hidden', !cover.sticker); };
     syncStk();
     stkDel.onclick = () => { delete cover.sticker; syncStk(); redraw(); };
     box.querySelector('#stkPick').onclick = async () => {
       const e = await pickSticker('Figurinha da capa'); if (!e) return;
-      cover.sticker = e; cover.art = ''; delete cover.photoId; syncPhoto(); syncStk();
-      artRow.querySelectorAll('.theme').forEach((x, i) => x.setAttribute('aria-pressed', i === 0)); redraw();
+      cover.sticker = e; cover.art = ''; delete cover.photoId; syncPhoto(); syncStk(); drawThemes(); redraw();
     };
     const photoBtn = box.querySelector('#photoBtn'), photoDel = box.querySelector('#photoDel'), photoIn = box.querySelector('#photoIn');
-    const syncPhoto = () => { photoDel.classList.toggle('hidden', !cover.photoId); photoBtn.textContent = cover.photoId ? 'Trocar foto' : 'Escolher foto da galeria'; };
+    const syncPhoto = () => { photoDel.classList.toggle('hidden', !cover.photoId); photoBtn.textContent = cover.photoId ? 'Trocar foto ▸' : 'Escolher foto ▸'; box.querySelector('#photoVal').textContent = cover.photoId ? 'Foto escolhida' : 'Nenhuma'; };
     syncPhoto();
     photoBtn.onclick = () => { photoIn.value = ''; photoIn.click(); };
     photoDel.onclick = () => { delete cover.photoId; delete cover.photoN; delete cover.photoSh; syncPhoto(); redraw(); };
@@ -1629,13 +1815,10 @@ function coverDialog(nb, presetName){
         const url = cvp.toDataURL('image/jpeg', 0.8), id = newId(), sharedNb = !!(nb && nb.shared);
         const ready = new Image(); ready.src = url; await new Promise(r => { ready.onload = r; ready.onerror = r; });
         const n = await saveImage(id, url, sharedNb); imgCache.set(id, { url, img: ready });
-        cover.photoId = id; cover.photoN = n; cover.photoSh = sharedNb; cover.art = ''; delete cover.sticker; syncStk();
-        artRow.querySelectorAll('.theme').forEach((x, i) => x.setAttribute('aria-pressed', i === 0));
+        cover.photoId = id; cover.photoN = n; cover.photoSh = sharedNb; cover.art = ''; delete cover.sticker; syncStk(); drawThemes();
         syncPhoto(); redraw();
       } catch (e) { toast('Não consegui abrir essa foto.'); syncPhoto(); }
     };
-    const emRow = box.querySelector('#emRow');
-    COVER_EMOJIS.forEach(e => { const b = document.createElement('button'); b.type = 'button'; b.className = 'emo'; b.textContent = e || '∅'; b.setAttribute('aria-label', e ? 'Enfeite ' + e : 'Sem enfeite'); b.setAttribute('aria-pressed', (cover.emoji || '') === e); b.onclick = () => { cover.emoji = e; emRow.querySelectorAll('.emo').forEach(x => x.setAttribute('aria-pressed', x === b)); redraw(); }; emRow.appendChild(b); });
     const tplBtn = box.querySelector('#tplBtn');
     const tplLabel = () => { tplBtn.textContent = TEMPLATES[tpl].name + ' ▸'; };
     tplLabel();
@@ -3074,7 +3257,8 @@ function insertAndSelect(item){
   toast('Arraste para posicionar. Puxe a bolinha azul para aumentar ou diminuir.', 3500);
 }
 let stkTab = 'Estudo';
-function pickSticker(title){
+function pickSticker(title, startTab){
+  if (startTab && STICKERS[startTab]) stkTab = startTab;
   return new Promise(resolve => {
     let done = false;
     openSheet(title, body => {

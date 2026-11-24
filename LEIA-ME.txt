@@ -1,4 +1,4 @@
-ATUALIZAR O APP NO GITHUB (pelo tablet) - versão v5
+ATUALIZAR O APP NO GITHUB (pelo tablet) - versão v6
 
 1. Extraia este zip no tablet (app Arquivos > segure o zip > Extrair).
 2. Abra github.com/AnnaZaqueu/AnnaZaqueu.github.io no Chrome.
@@ -7,12 +7,5 @@ ATUALIZAR O APP NO GITHUB (pelo tablet) - versão v5
    (eles substituem os antigos).
 5. Desça a página e toque em "Commit changes".
 6. Espere uns 2 minutos, abra o app, feche e abra de novo.
-
-O Chrome costuma atualizar o app instalado sozinho em 1 ou 2 dias.
-Se depois disso o app ainda não abrir sem as barras do Android,
-depois de atualizar: segure o ícone do Caderno > Desinstalar,
-abra annazaqueu.github.io no Chrome e instale de novo (⋮ > Instalar app).
-ANTES disso, faça um backup (menu ··· na tela inicial > Fazer backup),
-por segurança. Depois, se precisar, use "Restaurar um backup".
 
 Suas anotações não são apagadas ao atualizar: elas ficam no tablet.
